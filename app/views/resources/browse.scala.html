@@ -1,0 +1,21 @@
+@(  user: User)(implicit flash: Flash, req: Request[AnyContent])
+
+@import _root_.util.config.Feature
+@import _root_.util.plugins.SoftLayer
+@import _root_.util.views.{MetaValueOrderer, TagDecorator}
+
+@main("Browse Assets") {
+
+<div class="btn-group">
+    <button id="atlas-stop" type="button" class="btn btn-danger">Stop Layout</button>
+    <button id="atlas-start" type="button" class="btn btn-success">Start Layout</button>
+</div>
+<div id="sigma-parent">
+    <div class="sigma-expand" id="sitemap"></div>
+</div>
+<script src="@routes.Assets.at("javascripts/sigma.js")" type="text/javascript"></script>
+<script src="@routes.Assets.at("javascripts/sigma.forceatlas2.js")" type="text/javascript"></script>
+<script src="@routes.Assets.at("javascripts/browse.js")" type="text/javascript"></script>
+
+
+}

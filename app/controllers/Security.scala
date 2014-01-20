@@ -140,7 +140,17 @@ trait SecureApiController extends SecureController {
     request.headers.get(HeaderNames.AUTHORIZATION) match {
       case None =>
         logger.debug("Got API request with no auth header")
-        setUser(None)
+        setUser(None)   
+        User.fromMap(request.session.data) match {
+          case Some(user) => user.isAuthenticated match {
+          case true =>
+            setUser(Some(user))
+          case false =>
+            logger.debug("SecureWebController.authenticate: user found, not authenticated")
+            setUser(None)
+          }
+        }
+
       case Some(header) =>
         try {
           parseAuthHeader(header) match {

@@ -28,9 +28,9 @@ case class MetaWrapper(_meta: AssetMeta, _value: AssetMetaValue) {
 
 object MetaWrapper {
   def apply(amv: AssetMetaValue): MetaWrapper = MetaWrapper(amv.getMeta, amv)
-  def createMeta(asset: Asset, metas: Map[String,String], groupId: Option[Int] = None) = {
+  def createMeta(asset: Asset, metas: Map[String,String], groupId: Option[Int] = None, description: Option[String]  = None) = {
     val metaValues = metas.map { case(k,v) =>
-      val meta = AssetMeta.findOrCreateFromName(k)
+      val meta = AssetMeta.findOrCreateFromName(k,desc=description)
       groupId.map(AssetMetaValue(asset, meta.id, _, v))
         .getOrElse(AssetMetaValue(asset, meta.id, v))
     }.toSeq

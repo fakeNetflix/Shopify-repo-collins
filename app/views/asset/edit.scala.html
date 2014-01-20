@@ -1,0 +1,193 @@
+@( aa: models.asset.AllAttributes, user: User)(implicit flash: Flash, req: Request[AnyContent])
+
+@import _root_.util.config.Feature
+@import _root_.util.plugins.SoftLayer
+@import _root_.util.views.{MetaValueOrderer, TagDecorator}
+
+@main("Edit asset "+aa.asset.tag) {
+<p>Edit <a href=@{"/asset/"+aa.asset.tag}>@aa.asset.tag</a></p>
+
+<table id="basicDataTable" class="table table-hover table-condensed">
+       <thead>
+         <tr>
+           <th>Synced?</th><th>Key</th><th>Value</th><th>Description</th>
+         </tr>
+       </thead>
+       <tbody id='metatable'>
+
+          @MetaValueOrderer.order(aa.mvs.filter(_.getName() != "HOSTNAME")).map { case(size, mv) =>
+          <tr target=@mv.getName>
+            <td> <i type="state" class="icon-ok-sign"></i></td>
+            <th type="name" >@mv.getLabel() @if(size > 1 || mv.getGroupId() != 0){(@mv.getGroupId())}</th>
+            <td type="value" id=@mv.getName class="editable">
+            @{
+              mv.getName match {
+                case "CANCEL_TICKET" => optionDisplay(0, SoftLayer.ticketLink(mv.getValue), mv.getValue)
+                case "DISK_STORAGE_TOTAL" => optionDisplay(1, Some(mv.getValue), mv.getValue)
+                case encrypted if Feature.encryptedTags.map(_.name).contains(encrypted) => if(user.canSeePasswords) { TagDecorator.decorate(mv) } else { "********" }
+                case _ => TagDecorator.decorate(mv)
+              }
+            }
+            </td>
+            <td type="description" class="editable">@mv.getDescription</td>
+            <td><a class="btn btn-danger delete-btn" >Delete</a></td>
+          </tr>
+          }
+
+</tbody>
+</table>
+<a id="add-btn" class="btn" >Add</a>
+<a id="save-btn" class="btn" >Save</a>
+
+
+<script>
+$('#add-btn').click(function() {
+    var table = $("#metatable")
+
+    row = $( document.createElement('tr') );
+    $(row).attr("newrow", true);
+
+    state = $( document.createElement('td'));
+    $(state).append("<i type='state' class='icon-remove-sign'></i>");
+
+    label = $( document.createElement('th'));
+    $(label).text("SET_LABEL")
+    $(label).attr("contenteditable", "true");
+    $(label).attr("type", "name");
+
+    value = $( document.createElement('td'));
+    $(value).text("SET_VALUE")
+    $(value).attr("contenteditable", "true");
+    $(value).attr("type", "value");
+
+
+    desc = $( document.createElement('td'));
+    $(desc).text("SET_DESC")
+    $(desc).attr("contenteditable", "true");
+    $(desc).attr("type", "description");
+
+    dbutton = $( document.createElement('td'));
+    a_dbutton = $( document.createElement('a'));
+    $(a_dbutton).addClass("btn")
+    $(a_dbutton).addClass("btn-danger")
+    $(a_dbutton).addClass("delete-btn")
+    $(a_dbutton).text("Delete")
+    dbutton.append(a_dbutton)
+
+    $(dbutton).click( function(){
+        deleteMeta($(row))
+    })
+
+
+    
+
+
+    row.append(state);
+    row.append(label);
+    row.append(value);
+    row.append(desc);
+    row.append(dbutton);
+
+    table.append(row);
+    $(row).attr("changed", true);
+})
+
+$('#save-btn').click(function() {
+
+    changes = $( "tr[changed='true']" )
+
+    changes.each( function(index,value) {
+        name = $.trim($(this).children("th[type='name']:first").text())
+        val = $.trim($(this).children("td[type='value']:first").text())
+        desc = $.trim($(this).children("td[type='description']:first").text())
+        row = $(this)
+
+        var url_endpoint =  '@{"/api/tag/"+aa.asset.tag+"/edit"}' 
+    //api/tag/:tag/edit
+
+        if (name != "SET_LABEL")
+        {
+            $.ajax({
+                url: url_endpoint,
+                type: 'POST',
+                data: { 
+                    'name': name, 
+                    'value': val, 
+                    'description': desc 
+                },
+                success: function(result) {
+                    $(row).attr("changed",false)
+                    $(row).attr("newrow",false)
+                    glyph = $(row).find("i[type='state']:first")
+                    glyph.attr("class","icon-ok-sign")
+
+                }
+            });
+        }else
+        {
+            alert("You must set a label, SET_LABEL is not valid")
+        }
+
+
+    }  )
+})
+
+$('.editable').click(function() {
+    $(this).attr("contenteditable", "true");
+    var row = $(this).parent();
+    $(row).attr("changed", true);
+    
+    glyph = $(row).find("i[type='state']:first")
+    glyph.attr("class","icon-remove-sign")
+})
+
+
+
+
+function deleteRow(toDelete)
+{
+    toDelete.fadeOut(400, function() {
+        toDelete.remove();
+    });
+
+}
+
+function deleteMeta(toDelete) {
+
+
+    if ($(toDelete).attr('newrow') == 'true')
+    {
+        deleteRow(toDelete)
+        return
+    }
+
+    var target = $(toDelete).attr("target"); 
+
+    if (target != null)
+    {
+        var url_endpoint =  '@{"/api/asset/"+aa.asset.tag+"/attribute/"}' + target
+        $.ajax({
+    //
+            url: url_endpoint,
+            type: 'DELETE',
+            success: function(result) {
+                deleteRow(toDelete)
+            }
+        });
+    }
+    else {
+        alert("can't delele null")
+    }
+}
+
+
+
+$('.delete-btn').click( function(){
+    deleteMeta($(this).parent().parent())
+})
+
+//api/tag/:tag/edit
+//api/asset/:tag/attribute/:attribute
+</script>
+}
+

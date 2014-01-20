@@ -1,7 +1,7 @@
 package controllers
 
 import actions.asset.{CreateAction, FindSimilarAction}
-import actions.resources.{FindAction, IntakeStage1Action, IntakeStage2Action, IntakeStage3Action}
+import actions.resources.{FindAction, IntakeStage1Action, IntakeStage2Action, IntakeStage3Action, EditAction, BrowseAction}
 
 import models._
 import views._
@@ -51,5 +51,8 @@ trait Resources extends Controller {
     case 3 => IntakeStage3Action(id, Permissions.Resources.Intake, this)
     case n => IntakeStage1Action(id, Permissions.Resources.Intake, this)
   }
+
+  def editAsset(tag: String ) =  EditAction(tag, Permissions.Resources.Intake, this)
+  def browseAssets( ) =  BrowseAction( Permissions.Resources.Find, this)
 
 }

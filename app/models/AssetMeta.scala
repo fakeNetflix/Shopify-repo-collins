@@ -1,6 +1,7 @@
 package models
 
 import play.api.libs.json._
+import play.api.Logger
 
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.{Schema, Table}
@@ -63,6 +64,7 @@ case class AssetMeta(
 
 object AssetMeta extends Schema with AnormAdapter[AssetMeta] {
   private[this] val NameR = """[A-Za-z0-9\-_]+""".r.pattern.matcher(_)
+  private[this] val logger = Logger.logger
 
   override val tableDef = table[AssetMeta]("asset_meta")
   on(tableDef)(a => declare(
@@ -95,16 +97,37 @@ object AssetMeta extends Schema with AnormAdapter[AssetMeta] {
     tableDef.lookup(id)
   }
 
-  def findOrCreateFromName(name: String, valueType: ValueType = ValueType.String): AssetMeta = findByName(name).getOrElse {
-    create(AssetMeta(
-      name = name.toUpperCase, 
-      priority = -1, 
-      label = name.toLowerCase.capitalize, 
-      description = name,
-      value_type = valueType.id
-    ))
-    findByName(name).get
+  def findOrCreateFromName(name: String, valueType: ValueType = ValueType.String, desc: Option[String] = None ):  AssetMeta = 
+  {
+
+      val existing = findByName(name).getOrElse{
+        create(AssetMeta(
+            name = name.toUpperCase, 
+            priority = -1, 
+            label = name.toLowerCase.capitalize, 
+            description = desc.getOrElse(name),
+            value_type = valueType.id
+          )
+        )
+      }
+
+      //works  for updating but can be optimized, short short circuit if it doesn't need to update description
+      inTransaction{
+        val newval = AssetMeta( 
+          name = name.toUpperCase,
+          priority = existing.priority,
+          label = existing.label,
+          id = existing.id,
+          description = desc.getOrElse(existing.name),
+          value_type = existing.value_type
+
+        )
+        AssetMeta.tableDef.update(newval)
+
+      }
+      findByName(name).get
   }
+
 
   override def get(a: AssetMeta) = findById(a.id).get
 

@@ -1,0 +1,11 @@
+div#sigma-parent{
+  width:1400px;
+  height:500px;
+  position:relative;
+}
+
+div#sitemap{
+  position:absolute;
+  width:100%;
+  height:100%;
+}

@@ -17,6 +17,8 @@
 
     <ul class="nav nav-pills">
       <li class="active"><a href="#overview" data-toggle="pill">Overview</a></li>
+      <li><a href="#hierarchy" data-toggle="pill">Hierarchy</a></li>
+      <li><a href="#network" data-toggle="pill">Network</a></li>
       @if(aa.ipmi.nonEmpty || PowerManagement.powerAllowed(aa.asset)) {
       <li><a href="#ipmi-info" data-toggle="pill">IPMI Info</a></li>
       }
@@ -32,6 +34,7 @@
         <ul class="dropdown-menu">
           <li>@modalLink("#asset-note", "Create Note", icon = Some("icon-comment"))</li>
           <li class="divider"></li>
+          <li><a href="/asset/@aa.asset.tag/edit" data-toggel="pill"><i class="icon-edit"></i> Edit</a></li>
           @if(Permissions.please(user, Permissions.AssetWebApi.CancelAsset) && SoftLayer.canCancel(aa.asset)) {
             <li>@modalLink("#cancel-server", "Cancel Server", icon = Some("icon-warning-sign"))</li>
           }

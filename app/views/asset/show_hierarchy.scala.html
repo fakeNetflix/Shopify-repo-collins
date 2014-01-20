@@ -1,0 +1,93 @@
+@(aa: models.asset.AllAttributes, user: User)(implicit flash: Flash, req: Request[AnyContent])
+
+@import helper._
+
+<!-- Start hierarchy Info -->
+<div class="tab-pane" id="hierarchy">
+
+
+@if(aa.hierarchy.nonEmpty) {
+<table class="table table-bordered table-hover table-condensed" id="children">
+    <tbody>
+    <tr>
+        <th>Parent:</th> 
+        @if(aa.hierarchy.get.parent.nonEmpty){    
+            <th colspan="2"><a href=@{"/asset/"+aa.hierarchy.get.parent.get.tag+"#hierarchy"}>@aa.hierarchy.get.parent.get.tag</a></th>
+        }else{
+            <td>Asset has no parent</td><td></td><td></td>
+        }
+    </tr>
+
+    @if(aa.hierarchy.get.asset_info.nonEmpty){
+    <tr>
+        @if(!aa.hierarchy.get.getRuCount.isEmpty){
+            <th>RU</th>
+        }
+            <th>Child Label</th><th>Child Tag</th>
+        </tr>
+        @for( c <- aa.hierarchy.get.getDisplayTable.sortWith(_.end_index > _.end_index)){
+            
+            <tr>
+                @if(c.end_index >0){
+                    <th>@c.end_index</th>
+                }
+
+                @if(!c.info.isEmpty && c.info.get.child_end == c.end_index ){
+                    <td units=@c.info_span>@c.info.get.child_label</td>
+                    <td units=@c.info_span><a href=@{"/asset/"+c.info.get.child_tag+"#hierarchy"}>@c.info.get.child_tag</a></td>
+                }else{
+                    <td></td><td></td>
+                }
+            
+            </tr>
+                
+        }
+    }else{
+        <tr><th>Asset has no children</th><th></th></tr>
+    }
+    </tbody>
+  </table>
+  } else {
+  <div class="row">
+    <div class="span12">
+      None Available
+    </div>
+  </div>
+  }
+</div>
+
+<script>
+
+$( document ).ready(function() {
+
+    //hide unmerged cells
+    var rows = $("#children").find("tr").toArray()    
+
+    for (var i = 0; i < rows.length; i++)
+    {
+        var row = rows[i]
+
+        for (var j = 0; j < row.children.length; j++)
+        {
+            cell = row.children[j]
+            if (cell.hasAttribute('units'))
+            {
+                var units = cell.getAttribute('units');
+                $(cell).attr('rowspan',units);
+
+                for ( var k =  1; k < units; k++  )
+                {
+
+                    var nextRow = rows[i+k]
+                    var remove = nextRow.children[j]
+                    $(remove).hide()
+                }
+            }
+
+        }
+    }
+
+});
+
+</script>
+<!-- End hierarchy Info -->

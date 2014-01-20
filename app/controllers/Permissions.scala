@@ -108,6 +108,15 @@ object Permissions {
     def Spec = spec(LoggedIn)
     def GetTags = spec("getTags", Spec)
     def GetTagValues = spec("getTagValues", AdminSpec)
+    def UpdateTag = spec("updateTag", AdminSpec)
+
   }
+
+  object HierarchyApi extends PermSpec("controllers.HierarchyApi") {
+    def Spec = spec(LoggedIn)
+    def UpdateHierarchy = spec("updateHierarchy", AdminSpec)
+
+  }
+
 
 }

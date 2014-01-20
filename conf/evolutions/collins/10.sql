@@ -12,6 +12,8 @@ UPDATE asset_type SET name='POWER_CIRCUIT', label='Power Circuit' WHERE id=6;
 UPDATE asset_type SET name='POWER_STRIP', label='Power Strip' WHERE id=7;
 UPDATE asset_type SET name='DATA_CENTER', label='Data Center' WHERE id=8;
 UPDATE asset_type SET name='CONFIGURATION', label='Configuration' WHERE id=9;
+UPDATE asset_type SET name='DATA_ROOM', label='Data Center Room' WHERE id=10;
+UPDATE asset_type SET name='DATA_ROW', label='Data Center Row' WHERE id=11;
 
 # --- !Downs
 
@@ -25,4 +27,6 @@ UPDATE asset_type SET name='Power Circuit' WHERE id=6;
 UPDATE asset_type SET name='Power Strip' WHERE id=7;
 UPDATE asset_type SET name='Data Center' WHERE id=8;
 UPDATE asset_type SET name='Configuration' WHERE id=9;
+UPDATE asset_type SET name='Data Center Room' WHERE id=10;
+UPDATE asset_type SET name='Data Center Row' WHERE id=11;
 

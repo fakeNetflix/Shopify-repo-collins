@@ -1,5 +1,11 @@
 # Collins
 
+## Importing  
+
+Use the import scripts:
+
+https://gist.github.com/dalehamel/7a2d8aa448a11693c275#file-import-resources-to-collins
+
 ## Overview
 
 There is good documentation available at http://tumblr.github.com/collins. The

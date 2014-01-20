@@ -14,6 +14,8 @@ object AllAttributes {
         LshwRepresentation.empty,
         LldpRepresentation.empty,
         None,
+        None,
+        None,
         IpAddresses.findAllByAsset(asset),
         PowerUnits(),
         AssetMetaValue.findByAsset(asset)
@@ -22,10 +24,11 @@ object AllAttributes {
       val (lshwRep, mvs) = LshwHelper.reconstruct(asset)
       val (lldpRep, mvs2) = LldpHelper.reconstruct(asset, mvs)
       val ipmi = IpmiInfo.findByAsset(asset)
+      val hierarchy = HierarchyInfo.getHierarchyNode(asset)
       val addresses = IpAddresses.findAllByAsset(asset)
       val (powerRep, mvs3) = PowerHelper.reconstruct(asset, mvs2)
       val filtered: Seq[MetaWrapper] = mvs3.filter(f => !Feature.hideMeta.contains(f.getName))
-      AllAttributes(asset, lshwRep, lldpRep, ipmi, addresses, powerRep, filtered)
+      AllAttributes(asset, lshwRep, lldpRep, ipmi, hierarchy, None, addresses, powerRep, filtered)
     }
   }
 }
@@ -35,6 +38,8 @@ case class AllAttributes(
   lshw: LshwRepresentation,
   lldp: LldpRepresentation,
   ipmi: Option[IpmiInfo],
+  hierarchy: Option[HierarchyNode],
+  network: Option[NetworkInfo],
   addresses: Seq[IpAddresses],
   power: PowerUnits,
   mvs: Seq[MetaWrapper])

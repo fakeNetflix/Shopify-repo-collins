@@ -20,7 +20,7 @@ private[controllers] case class ResponseData(status: Results.Status, data: JsVal
 }
 
 trait Api extends ApiResponse with AssetApi with AssetManagementApi with AssetWebApi with AssetLogApi with IpmiApi with TagApi with
-IpAddressApi with AssetStateApi with AdminApi {
+IpAddressApi with AssetStateApi with HierarchyApi with AdminApi {
   this: SecureController =>
 
   lazy protected implicit val securitySpec = Permissions.LoggedIn

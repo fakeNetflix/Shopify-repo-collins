@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                           app.Resources.index
+GET     /browse                     app.Resources.browseAssets
 
 # Resources/Assets
 GET     /resources                  app.Resources.find(page: Int ?= 0, size: Int ?= 50, sort: String ?= "ASC", operation: String ?= "and", sortField: String ?= "TAG")
@@ -23,6 +24,7 @@ POST    /asset/:tag/power           app.CookieApi.powerManagement(tag: String)
 GET     /asset/:tag/power           app.CookieApi.powerStatus(tag: String)
 GET     /asset/:tag/similar         app.Resources.similar(tag: String, page: Int ?= 0, size: Int ?= 50, sort: String  ?= "ASC")
 
+GET     /asset/:tag/edit            app.Resources.editAsset(tag: String)
 # Admin pages
 GET     /admin/stats                controllers.Admin.stats
 GET     /admin/logs                 controllers.Admin.logs
@@ -88,6 +90,15 @@ GET     /api/states                 app.Api.getStates
 # Tag management API
 GET     /api/tags                   app.Api.getTags
 GET     /api/tag/:tag               app.Api.getTagValues(tag: String)
+POST    /api/tag/:tag/edit          app.Api.updateTagValues(tag: String)
+
+# Hierarchy manangement API
+POST    /api/hierarchy/:tag             app.Api.updateHierarchyValues(tag: String)
+GET     /api/hierarchy/:tag/children    app.Api.getChildren(tag: String)
+GET     /api/hierarchy/:tag/parent      app.Api.getParent(tag: String)
+GET     /api/hierarchy/nodes            app.Api.getAllNodes()
+DELETE  /api/hierarchy/:tag/:child      app.Api.deleteHierarchyLink(tag: String, child: String)
+
 
 # For testing
 GET     /api/asyncPing              app.Api.asyncPing(sleepMs: Long ?= 1000)

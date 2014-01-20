@@ -103,7 +103,7 @@
         @MetaValueOrderer.order(aa.mvs.filter(_.getName() != "HOSTNAME")).map { case(size, mv) =>
         <tr>
           <th>@mv.getLabel() @if(size > 1 || mv.getGroupId() != 0){(@mv.getGroupId())}</th>
-          <td>
+          <td name=@{mv.getName}>
           @{
             mv.getName match {
               case "CANCEL_TICKET" => optionDisplay(0, SoftLayer.ticketLink(mv.getValue), mv.getValue)

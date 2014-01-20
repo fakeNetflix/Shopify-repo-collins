@@ -13,6 +13,7 @@ FILE_LIMIT=8192
 COLLINS_USER="collins"
 HEAP_OPTS="-XX:MaxPermSize=384m"
 
+JAVA_HOME="/usr"
 # Check for config overrides
 [ -f /etc/sysconfig/collins ] && . /etc/sysconfig/collins
 
