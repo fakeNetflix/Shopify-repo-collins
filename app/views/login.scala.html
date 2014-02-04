@@ -1,10 +1,10 @@
-@(loginForm: Form[(String,String,Option[String])])(implicit flash: Flash, req: Request[AnyContent])
+@(loginForm: Form[(String,String,Option[String])], isOpenId: Boolean)(implicit flash: Flash, req: Request[AnyContent])
 
 @import twitterBootstrap._
 @import helper._
 @import util.notice
 
-@main("Login", false) {
+@main("Login", false, isOpenId) {
 <div class="page-header"><h1>Login <small>Enter your credentials</small></h1></div>
 <div class="row">
   <div class="span12">
@@ -21,10 +21,12 @@
     }
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Sign in</button>
+      @if(isOpenId) {
+        <button type="submit" name="openid" class="btn btn-primary">Sign in with Google</button>
+      }
       @loginForm("location").value.map { value =>
       <input type="hidden" name="location" value="@value">
       }
-      <button type="reset" class="btn">Cancel</button>
     </div>
 }
   </div>

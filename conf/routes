@@ -37,6 +37,7 @@ GET     /help                       app.HelpPage.index(t: String ?= controllers.
 # Authentication
 GET     /login                      controllers.Application.login
 POST    /login                      controllers.Application.authenticate
+GET     /openid                     controllers.Application.openid
 GET     /logout                     controllers.Application.logout
 
 # API
@@ -45,8 +46,8 @@ GET     /logout                     controllers.Application.logout
 GET     /api/timestamp                       app.Api.timestamp
 
 # Admin API
-GET     /api/admin/solr                          app.Api.repopulateSolr(waitForCompletion: String ?= "true")
-GET     /api/admin/solr/asset/:tag               app.Api.reindexAsset(tag: String)
+GET     /api/admin/solr                      app.Api.repopulateSolr(waitForCompletion: String ?= "true")
+GET     /api/admin/solr/asset/:tag           app.Api.reindexAsset(tag: String)
 
 # IP Address API
 GET     /api/address/pools                   app.Api.getAddressPools(all: String ?= "true")

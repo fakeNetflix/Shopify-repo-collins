@@ -45,8 +45,7 @@ trait AuthenticationProvider {
 
 object AuthenticationProvider {
   val Default = new MockAuthenticationProvider
-  val Types = Set("ldap", "file", "default")
-  def filename = AuthenticationProviderConfig.permissionsFile 
+  def filename = AuthenticationProviderConfig.permissionsFile
 
   private val logger = Logger("util.security.AuthenticationProvider")
 

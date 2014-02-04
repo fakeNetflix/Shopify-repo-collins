@@ -73,3 +73,20 @@ object LdapAuthenticationProviderConfig extends Configurable {
     }
   }
 }
+
+object OpenIdAuthenticationProviderConfig extends Configurable {
+
+  override val namespace = "authentication.openid"
+  override val referenceConfigFilename = "authentication_reference.conf"
+
+  def baseUrl = getString("baseUrl")(ConfigValue.Required).get
+  def whitelistDomain = getString("whitelistDomain").getOrElse("")
+  def whitelistFile = getString("whitelistFile")(ConfigValue.Required).get
+
+  override protected def validateConfig() {
+    if (AuthenticationProviderConfig.authType == "openid") {
+      File.requireFileIsReadable(whitelistFile)
+      baseUrl
+    }
+  }
+}

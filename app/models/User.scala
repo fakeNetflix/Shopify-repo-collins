@@ -69,7 +69,7 @@ object User {
       }
     }.getOrElse(throw UserException("Not in application"))
   }
-  
+
   def fromMap(map: Map[String,String]): Option[User] = {
     val user = Map(
       USERNAME -> map.get(USERNAME),
