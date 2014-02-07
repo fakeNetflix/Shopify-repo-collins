@@ -34,7 +34,16 @@
             <input type="text" class="focus" id="tag" name="tag" tabindex="1" autocomplete="off">
             <span class="help-inline"><i class="icon-question-sign" data-rel="tooltip" title="Unique identifier for asset"></i></span>
           }
+          }
+
+        @formField {
+          @formLabel("name", "Asset Name")
+          @formInput {
+            @optionDisplay(AssetMeta.findOrCreateFromName("name"), 0, 0)
+          }
         }
+ 
+
         @formField {
           @formLabel("status", "Status")
           @formInput {
