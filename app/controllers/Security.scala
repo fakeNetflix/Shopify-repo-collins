@@ -12,6 +12,7 @@ import models.User
 import util._
 import util.config.AppConfig
 import util.security._
+import models.{SessionStore, Session}
 
 import org.apache.commons.codec.binary.Base64
 
@@ -96,12 +97,12 @@ trait SecureWebController extends SecureController {
   val unauthorizedRoute = routes.Application.login.url
   def securityMessage(req: RequestHeader) = ("security" -> "The specified resource requires additional authorization")
 
-  override def getUser(request: RequestHeader): User = User.fromMap(request.session.data).get
+  override def getUser(request: RequestHeader): User = User.fromMap(SessionStore.getSession(request)).get
 
   override def onUnauthorized = Action { implicit request =>
     // If user is not logged in and accesses a page, store the location so they can be redirected
     // after authentication
-    if (User.fromMap(request.session.data).isDefined) {
+    if (User.fromMap(SessionStore.getSession(request)).isDefined) {
       Results.Redirect("/").flashing(securityMessage(request))
     } else {
       if (request.path != "/login") {
@@ -113,7 +114,7 @@ trait SecureWebController extends SecureController {
   }
 
   /** Use sessions storage for authenticate/etc */
-  override def authenticate(request: RequestHeader) = User.fromMap(request.session.data) match {
+  override def authenticate(request: RequestHeader) = User.fromMap(SessionStore.getSession(request)) match {
     case Some(user) => user.isAuthenticated match {
       case true =>
         setUser(Some(user))
@@ -133,7 +134,7 @@ trait SecureApiController extends SecureController {
     Results.Unauthorized(Txt("Invalid Username/Password specified"))
   }
 
-  override def getUser(request: RequestHeader): User = User.fromMap(request.session.data).get
+  override def getUser(request: RequestHeader): User = User.fromMap(SessionStore.getSession(request)).get
 
   /** Do not use session storage for authenticate */
   override def authenticate(request: RequestHeader): Option[User] = {
@@ -141,7 +142,7 @@ trait SecureApiController extends SecureController {
       case None =>
         logger.debug("Got API request with no auth header")
         setUser(None)
-        User.fromMap(request.session.data) match {
+        User.fromMap(SessionStore.getSession(request)) match {
           case Some(user) => user.isAuthenticated match {
               case true =>
                 setUser(Some(user))

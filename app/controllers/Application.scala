@@ -62,9 +62,9 @@ object Application extends SecureWebController {
           val u = User.toMap(User.authenticate(user._1, user._2))
           user._3 match {
             case Some(location) =>
-              Redirect(location).withSession(u.toSeq:_*)
+              SessionStore.withSession(Redirect(location), u)
             case None =>
-              Redirect(app.routes.Resources.index).withSession(u.toSeq:_*)
+              SessionStore.withSession(Redirect(app.routes.Resources.index), u)
           }
         }
       )
@@ -102,9 +102,9 @@ object Application extends SecureWebController {
           } else {
             req.session.get("location") match {
               case None | Some("") =>
-                Redirect(app.routes.Resources.index).withSession(u.toSeq:_*)
+                  SessionStore.withSession(Redirect(app.routes.Resources.index), u)
               case Some(location) =>
-                Redirect(location).withSession(u.toSeq:_*)
+                  SessionStore.withSession(Redirect(location), u)
             }
           }
         } else {
@@ -128,6 +128,7 @@ object Application extends SecureWebController {
 
   def logout = SecureAction { implicit req =>
     setUser(None)
+    SessionStore.revokeSession(req)
     Redirect(routes.Application.login).withNewSession.flashing(
       "success" -> "You have been logged out"
     )
