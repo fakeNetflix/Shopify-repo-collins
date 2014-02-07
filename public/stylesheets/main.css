@@ -197,3 +197,31 @@ p { padding: 5px 0; }
   bottom: 270px;
 }
 
+/* Rack view */
+
+#hierarchy th {
+  border-left: none;
+}
+
+#hierarchy td {
+  border-left: none;
+}
+
+#hierarchy td.full {
+  background: #CFCFCF;
+
+  border-top: 1px solid #FFFFFF;
+  font-weight: bold;
+}
+
+#hierarchy tr:hover td.full {
+  background: #BFBFBF;
+}
+
+#hierarchy td.full > a {
+  color: #5555FF;
+}
+
+#hierarchy td.full > a:hover {
+  color: #3333AA;
+}

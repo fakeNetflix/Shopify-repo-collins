@@ -74,6 +74,9 @@ $( document ).ready(function() {
             {
                 var units = cell.getAttribute('units');
                 $(cell).attr('rowspan',units);
+@if(!aa.hierarchy.get.getRuCount.isEmpty){
+                $(cell).addClass('full');
+}
 
                 for ( var k =  1; k < units; k++  )
                 {
