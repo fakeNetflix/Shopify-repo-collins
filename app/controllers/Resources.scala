@@ -1,7 +1,7 @@
 package controllers
 
 import actions.asset.{CreateAction, FindSimilarAction}
-import actions.resources.{FindAction, IntakeStage1Action, IntakeStage2Action, IntakeStage3Action, EditAction, BrowseAction}
+import actions.resources.{FindAction, IntakeStage1Action, IntakeStage2Action, IntakeStage3Action, EditAction, BrowsePhysicalGraphAction, BrowsePhysicalTableAction}
 
 import models._
 import views._
@@ -53,6 +53,7 @@ trait Resources extends Controller {
   }
 
   def editAsset(tag: String ) =  EditAction(tag, Permissions.Resources.Intake, this)
-  def browseAssets( ) =  BrowseAction( Permissions.Resources.Find, this)
+  def browsePhysicalGraph() =  BrowsePhysicalGraphAction( Permissions.Resources.Find, this)
+  def browsePhysicalTable() =  BrowsePhysicalTableAction( Permissions.Resources.Find, this)
 
 }

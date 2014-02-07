@@ -36,7 +36,6 @@
           <a class="brand" href="@app.routes.Resources.index">Collins</a>
           <div class="nav-collapse collapse pull-right">
             <ul class="nav">
-              <li class="@("active".when(req.path == app.routes.Resources.browseAssets.toString()))" ><a href="@app.routes.Resources.browseAssets">Browse</a></li>
               <li class="@("active".when(req.path == app.routes.Resources.index.toString()))"><a href="@app.routes.Resources.index">Search</a></li>
               @User.fromMap(req.session.data).map { u =>
               @if(Permissions.please(u, Permissions.AssetLogApi.GetAll)) {
@@ -52,6 +51,13 @@
                 </ul>
               </li>
               }}
+              <li class="dropdown"> 
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Browse <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                   <li ><a href="@app.routes.Resources.browsePhysicalTable">Physical Resource Tables</a></li>
+                   <li ><a href="@app.routes.Resources.browsePhysicalGraph">Physical Resource Graph</a></li>
+                </ul>
+              </li>
               <li><a href="@app.routes.HelpPage.index("default")"><i class="icon-question-sign icon-white"></i></a></li>
               <li><a href="@routes.Application.logout">Logout</a></li>
             </ul>

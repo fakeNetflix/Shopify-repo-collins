@@ -4,7 +4,8 @@
 
 # Home page
 GET     /                           app.Resources.index
-GET     /browse                     app.Resources.browseAssets
+GET     /browse/physical/graph      app.Resources.browsePhysicalGraph
+GET     /browse/physical/table      app.Resources.browsePhysicalTable
 
 # Resources/Assets
 GET     /resources                  app.Resources.find(page: Int ?= 0, size: Int ?= 50, sort: String ?= "ASC", operation: String ?= "and", sortField: String ?= "TAG")

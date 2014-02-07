@@ -17,7 +17,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc.AsyncResult
 
-case class BrowseAction(
+case class BrowsePhysicalGraphAction(
   spec: SecuritySpecification,
   handler: SecureController
 ) extends SecureAction(spec, handler)  {
@@ -28,7 +28,25 @@ case class BrowseAction(
 
   override def execute(rd: RequestDataHolder) = {
       Status.Ok(
-        views.html.resources.browse(user )(flash, request)
+        views.html.resources.browse_physical_graph(user )(flash, request)
+      ) 
+  }
+
+ }
+
+
+case class BrowsePhysicalTableAction(
+  spec: SecuritySpecification,
+  handler: SecureController
+) extends SecureAction(spec, handler)  {
+
+
+
+  override def validate(): Either[RequestDataHolder,RequestDataHolder] =  Right(EphemeralDataHolder())
+
+  override def execute(rd: RequestDataHolder) = {
+      Status.Ok(
+        views.html.resources.browse_physical_table(user )(flash, request)
       ) 
   }
 
