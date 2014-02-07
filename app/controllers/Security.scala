@@ -178,7 +178,11 @@ trait SecureApiController extends SecureController {
         val decodedBase64 = Base64.decodeBase64(base64encoded.getBytes)
         val decoded = new String(decodedBase64)
         decoded.split(":").toList match {
-          case u :: tail  => User.authenticate(u, tail.mkString(":"))
+          case u :: tail  => {
+            val pass = tail.mkString(":")
+            if (pass.length < 3) throw new IllegalArgumentException("Password is too short!")
+            User.authenticate(u, pass)
+          }
           case _ => throw new IllegalArgumentException("No username:password found")
         }
       case _ => throw new IllegalArgumentException("Only Basic Auth is supported")

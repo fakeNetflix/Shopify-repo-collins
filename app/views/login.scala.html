@@ -22,7 +22,7 @@
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Sign in</button>
       @if(isOpenId) {
-        <button type="submit" name="openid" class="btn btn-primary">Sign in with Google</button>
+        <button type="submit" name="google" class="btn btn-primary">Sign in with Google</button>
       }
       @loginForm("location").value.map { value =>
       <input type="hidden" name="location" value="@value">
