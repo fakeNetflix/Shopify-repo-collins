@@ -10,14 +10,26 @@ INSERT INTO status VALUES (5, 'Maintenance', 'Asset is scheduled for maintenance
 INSERT INTO status VALUES (6, 'Decommissioned', 'Asset is gone');
 INSERT INTO status VALUES (7, 'Incomplete', 'Asset has not been finalized');
 
-INSERT INTO asset_type VALUES (1, 'Server Node');
-INSERT INTO asset_type VALUES (2, 'Server Chassis');
-INSERT INTO asset_type VALUES (3, 'Rack');
-INSERT INTO asset_type VALUES (4, 'Switch');
-INSERT INTO asset_type VALUES (5, 'Router');
-INSERT INTO asset_type VALUES (6, 'Power Circuit');
-INSERT INTO asset_type VALUES (7, 'Power Strip');
-INSERT INTO asset_type VALUES (8, 'Data Center');
+
+INSERT INTO asset_type VALUES (1, 'SERVER_NODE'   );
+INSERT INTO asset_type VALUES (2, 'SERVER_CHASSIS');
+INSERT INTO asset_type VALUES (3, 'RACK'          );
+INSERT INTO asset_type VALUES (4, 'DATA_ROW'      );
+INSERT INTO asset_type VALUES (5, 'DATA_ROOM'     );
+INSERT INTO asset_type VALUES (6, 'DATA_CENTER'   );
+INSERT INTO asset_type VALUES (7, 'SWITCH'        );
+INSERT INTO asset_type VALUES (8, 'ROUTER'        );
+INSERT INTO asset_type VALUES (9, 'FIREWALL'      );
+INSERT INTO asset_type VALUES (10, 'PATCH_PANEL'   );
+INSERT INTO asset_type VALUES (11, 'LOAD_BALANCER' );
+INSERT INTO asset_type VALUES (12, 'DDOS_MITIGATE' );
+INSERT INTO asset_type VALUES (13, 'SERIAL_SERVER' );
+INSERT INTO asset_type VALUES (14, 'POWER_CIRCUIT' );
+INSERT INTO asset_type VALUES (15, 'POWER_STRIP'   );
+INSERT INTO asset_type VALUES (16, 'PDU'           );
+INSERT INTO asset_type VALUES (17, 'CONFIGURATION' );
+
+
 
 INSERT INTO asset_meta VALUES (1, 'SERVICE_TAG', 1, 'Service Tag', 'Vendor supplied service tag');
 INSERT INTO asset_meta VALUES (2, 'CHASSIS_TAG', 1, 'Chassis Tag', 'Tag for asset chassis');
