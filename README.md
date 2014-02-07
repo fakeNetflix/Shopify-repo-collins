@@ -1,10 +1,8 @@
 # Collins
 
-## Importing  
+# Shopify
 
-Use the import scripts:
-
-https://gist.github.com/dalehamel/7a2d8aa448a11693c275#file-import-resources-to-collins
+Checkout http://vault.shopify.com/collins
 
 ## Overview
 
