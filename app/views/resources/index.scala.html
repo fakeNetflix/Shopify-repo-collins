@@ -38,7 +38,7 @@
         @formField {
           @formLabel("status", "Status")
           @formInput {
-            <select name="status" id="status" tabindex="501" accesskey="l">
+            <select name="status" id="status" tabindex="501" accesskey="l" readonly>
               <option value="" selected="selected"></option>
               @OptionSorter.sortStrings(Status.statusNames.toSeq, Some(" ")).map { v =>
               <option value="@v._1">@v._2</option>
@@ -50,7 +50,7 @@
         @formField {
           @formLabel("state", "State")
           @formInput {
-            <select name="state" id="state" tabindex="502">
+            <select name="state" id="state" tabindex="502" readonly>
               <option value="" selected="selected"></option>
               @State.find().sorted(State.StateOrdering).map { state =>
                 <option value="@state.name">@state.getDisplayLabel</option>
@@ -74,14 +74,14 @@
         @formField {
           @formLabel("IP_ADDRESS", "IP Address")
           @formInput {
-            <input type="text" id="IP_ADDRESS" name="IP_ADDRESS" tabindex="504">
+            <input type="text" id="IP_ADDRESS" name="IP_ADDRESS" tabindex="504" readonly>
             <span class="help-inline"><i class="icon-question-sign" data-rel="tooltip" title="IP address of the asset. Prefix searches are also supported."></i></span>
           }
         }
         @formField {
           @formLabel("IPMI_ADDRESS", "IPMI Address")
           @formInput {
-            <input type="text" id="IPMI_ADDRESS" name="IPMI_ADDRESS" placeholder="IPMI IP Address" tabindex="505">
+            <input type="text" id="IPMI_ADDRESS" name="IPMI_ADDRESS" placeholder="IPMI IP Address" tabindex="505" readonly>
           }
         }
         @formField {
@@ -116,7 +116,7 @@
         @if(MultiCollinsConfig.enabled) {
           @formField {
             @formLabel("", "")
-            <input type="checkbox" id="remoteLookup" name="remoteLookup" value="true" tabindex="506"> Remote Search <i class="icon-question-sign" data-rel="tooltip" title="Search for assets in other data-centers"></i>
+            <input type="checkbox" id="remoteLookup" name="remoteLookup" value="true" tabindex="506"> Remote Search <i class="icon-question-sign" data-rel="tooltip" title="Search for assets in other data-centers" readonly></i>
           }
         }
       </div>
@@ -124,10 +124,10 @@
       <div class="span6">
         @assetMeta.zipWithIndex.map { case(asset, idx) =>
           @formField {
-            @formLabel(asset.name, asset.label)
+      <!--            @formLabel(asset.name, asset.label)-->
             @formInput {
               @{
-  	            asset.name match {
+  	       /*     asset.name match {
                   case "DATACENTER_NAME" => optionDisplay(asset, 0, idx)
                   case "DISK_TYPE" => optionDisplay(asset, 2, idx)
                   case "DISK_STORAGE_TOTAL" => optionDisplay(asset, 1, idx)
@@ -140,7 +140,7 @@
                   case "SECONDARY_ROLE" => optionDisplay(asset, 0, idx)
                   case "BASE_VENDOR" => optionDisplay(asset, 0, idx)
                   case _ => basicFormatter(asset, idx)
-                }
+                }*/
               }
             }
           }
