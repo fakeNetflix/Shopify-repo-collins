@@ -32,7 +32,7 @@ object Session {
 }
 
 object SessionStore {
-  private val SESSION_TIMEOUT = 30
+  private val SESSION_TIMEOUT = 30 // In minutes
   private val store: collection.mutable.Map[String,Session] = collection.mutable.Map()
 
   def withSession(req: PlainResult, data: Map[String,String]): PlainResult = {

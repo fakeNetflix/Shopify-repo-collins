@@ -10,8 +10,8 @@
 <table class="table table-bordered table-hover table-condensed" id="children">
     <tbody>
     <tr>
-        <th>Parent:</th> 
-        @if(aa.hierarchy.get.parent.nonEmpty){    
+        <th>Parent:</th>
+        @if(aa.hierarchy.get.parent.nonEmpty){
             <th colspan="2"><a href=@{"/asset/"+aa.hierarchy.get.parent.get.tag+"#hierarchy"}>@aa.hierarchy.get.parent.get.tag</a></th>
         }else{
             <td>Asset has no parent</td><td></td><td></td>
@@ -26,7 +26,7 @@
             <th>Child Label</th><th>Child Tag</th>
         </tr>
         @for( c <- aa.hierarchy.get.getDisplayTable.sortWith(_.end_index > _.end_index)){
-            
+
             <tr>
                 @if(c.end_index >0){
                     <th>@c.end_index</th>
@@ -38,9 +38,9 @@
                 }else{
                     <td></td><td></td>
                 }
-            
+
             </tr>
-                
+
         }
     }else{
         <tr><th>Asset has no children</th><th></th></tr>
@@ -61,7 +61,7 @@
 $( document ).ready(function() {
 
     //hide unmerged cells
-    var rows = $("#children").find("tr").toArray()    
+    var rows = $("#children").find("tr").toArray()
 
     for (var i = 0; i < rows.length; i++)
     {

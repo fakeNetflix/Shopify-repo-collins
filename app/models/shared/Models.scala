@@ -4,7 +4,7 @@ import play.api.db._
 import play.api.{Play, Logger}
 import play.api.Play.current
 
-import org.squeryl.{PrimitiveTypeMode, Session, SessionFactory}
+import org.squeryl.{PrimitiveTypeMode, SessionFactory}
 import org.squeryl.adapters.{H2Adapter, MySQLInnoDBAdapter}
 import org.squeryl.logging.{LocalH2SinkStatisticsListener, StatsSchema}
 
@@ -27,16 +27,16 @@ object Model {
 
   def initialize() {
     SessionFactory.concreteFactory = Some(
-      () => new Session(DB.getConnection(name), adapter, None)
+      () => new org.squeryl.Session(DB.getConnection(name), adapter, None)
     )
   }
 
   def shutdown() {
-    if(Session.hasCurrentSession) {
+    if(org.squeryl.Session.hasCurrentSession) {
       Logger.debug("closing squeryl session")
 
-      Session.currentSession.close
-      Session.currentSession.unbindFromCurrentThread
+      org.squeryl.Session.currentSession.close
+      org.squeryl.Session.currentSession.unbindFromCurrentThread
     }
   }
 }
