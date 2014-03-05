@@ -16,6 +16,7 @@ object AuthenticationProviderConfig extends Configurable {
   def cachePermissionsTimeout = getMilliseconds("cachePermissionsTimeout").getOrElse(30000L)
   def permissionsFile = getString("permissionsFile")(ConfigValue.Required).get
   def authType = getString("type", "default").toLowerCase
+  def sessionTimeout = getMilliseconds("sessionTimeout").getOrElse(30L) * 60000L // Read timeout in minutes
 
   override protected def validateConfig() {
     File.requireFileIsReadable(permissionsFile)
