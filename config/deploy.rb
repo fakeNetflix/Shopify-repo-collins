@@ -44,6 +44,8 @@ namespace :deploy do
       within '/u/apps/collins/current' do
         execute :pwd 
         execute :play, 'clean compile stage'
+        execute :mkdir, 'target/conf'
+        execute :touch, 'target/conf/metrics-reporter-config.yaml'
         execute :sv, 'restart collins'
       end
     end
