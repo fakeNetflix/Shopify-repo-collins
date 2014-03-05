@@ -1,20 +1,25 @@
-require 'pathname'
-current_dir = File.expand_path(File.dirname(__FILE__))
-$:.unshift File.join(current_dir, 'scripts', 'deploy')
+# Load DSL and Setup Up Stages
+require 'capistrano/setup'
 
-set :source_url, 'http://repo.tumblr.net:8888/collins.zip'
+# Includes default deployment tasks
+require 'capistrano/deploy'
 
-ssh_options[:keys] = Pathname.new(File.expand_path('~/.ssh')).children.select do |entry|
-  entry.basename.to_s.start_with?('tumblr_')
-end.map(&:to_path)
+# Includes tasks from other gems included in your Gemfile
+#
+# For documentation on these, see for example:
+#
+#   https://github.com/capistrano/rvm
+#   https://github.com/capistrano/rbenv
+#   https://github.com/capistrano/chruby
+#   https://github.com/capistrano/bundler
+#   https://github.com/capistrano/rails
+#
+# require 'capistrano/rvm'
+# require 'capistrano/rbenv'
+# require 'capistrano/chruby'
+# require 'capistrano/bundler'
+# require 'capistrano/rails/assets'
+# require 'capistrano/rails/migrations'
 
-task :ewr01 do
-  role :app, 'collins.ewr01.tumblr.net'
-end
-
-task :d2 do
-  role :app, 'collins.d2.tumblr.net'
-end
-
-load 'deploy'
-load 'scripts/deploy/deploy'
+# Loads custom tasks from `lib/capistrano/tasks' if you have any defined.
+Dir.glob('lib/capistrano/tasks/*.cap').each { |r| import r }

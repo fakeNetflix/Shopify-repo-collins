@@ -43,7 +43,20 @@
           }
         }
  
-
+        @formField {
+          @formLabel("vendor", "Vendor")
+          @formInput {
+            @optionDisplay(AssetMeta.findOrCreateFromName("vendor"), 0, 0)
+          }
+        }
+  
+        @formField {
+          @formLabel("product", "Product")
+          @formInput {
+            @optionDisplay(AssetMeta.findOrCreateFromName("product"), 0, 0)
+          }
+        }
+ 
         @formField {
           @formLabel("status", "Status")
           @formInput {
@@ -81,16 +94,23 @@
           }
         }
         @formField {
+          @formLabel("SERIAL_NUMBER", "Serial Number")
+          @formInput {
+            <input type="text" id="SERIAL_NUMBER" name="SERIAL_NUMBER" tabindex="520" >
+            <span class="help-inline"><i class="icon-question-sign" data-rel="tooltip" title="Serial number of asset"></i></span>
+          }
+        }
+        @formField {
           @formLabel("IP_ADDRESS", "IP Address")
           @formInput {
-            <input type="text" id="IP_ADDRESS" name="IP_ADDRESS" tabindex="504" readonly>
+            <input type="text" id="IP_ADDRESS" name="IP_ADDRESS" tabindex="504" >
             <span class="help-inline"><i class="icon-question-sign" data-rel="tooltip" title="IP address of the asset. Prefix searches are also supported."></i></span>
           }
         }
         @formField {
           @formLabel("IPMI_ADDRESS", "IPMI Address")
           @formInput {
-            <input type="text" id="IPMI_ADDRESS" name="IPMI_ADDRESS" placeholder="IPMI IP Address" tabindex="505" readonly>
+            <input type="text" id="IPMI_ADDRESS" name="IPMI_ADDRESS" placeholder="IPMI IP Address" tabindex="505">
           }
         }
         @formField {
