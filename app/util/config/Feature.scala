@@ -58,6 +58,6 @@ object Feature extends Configurable {
     defaultLogType
     encryptedTags
     deleteSomeMetaOnRepurpose
-    syslogAsset
+  //  syslogAsset
   }
 }
