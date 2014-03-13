@@ -37,12 +37,19 @@
           }
 
         @formField {
+          @formLabel("hostname", "Hostname")
+          @formInput {
+            @optionDisplay(AssetMeta.findOrCreateFromName("hostname"), 0, 0)
+          }
+        }
+
+        @formField {
           @formLabel("name", "Asset Name")
           @formInput {
             @optionDisplay(AssetMeta.findOrCreateFromName("name"), 0, 0)
           }
         }
- 
+
         @formField {
           @formLabel("vendor", "Vendor")
           @formInput {
