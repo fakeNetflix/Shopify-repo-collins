@@ -22,7 +22,7 @@ case class HierarchyNode(
 
   def getDisplayTable(): List[HierarchyTableRow] = {
     var tableRows = List[HierarchyTableRow]()
-   
+
     var ru_count = getRuCount()
     if (!ru_count.isEmpty)
     {
@@ -46,7 +46,7 @@ case class HierarchyNode(
       }
 
     }
-     
+
     tableRows
   }
 
@@ -55,7 +55,7 @@ case class HierarchyNode(
 
     if(asset_info.length >0){
 
-        val asset =  Asset.findByTag(asset_info.first.asset_tag)
+        val asset =  Asset.findByTag(asset_info.head.asset_tag)
 
         val attrs = asset.get.getAllAttributes
         val ru_check = attrs.mvs.find(_.getName == "RU_COUNT")
@@ -174,15 +174,15 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
   def createOrUpdate(asset: Asset, child_tag: String, child_label: Option[String] = None,  child_start: Option[Int] = None, child_end: Option[Int] = None) =
   {
     val existing = findLink(asset.tag, child_tag).getOrElse{
-      inTransaction 
+      inTransaction
       {
         create(HierarchyInfo(
-            asset_tag = asset.tag, 
-            child_tag = child_tag, 
-            child_label = child_label.getOrElse(child_tag), 
+            asset_tag = asset.tag,
+            child_tag = child_tag,
+            child_label = child_label.getOrElse(child_tag),
             child_start = child_start.getOrElse(-1),
             child_end = child_end.getOrElse(-1),
-            priority = -1 
+            priority = -1
           )
         )
       }
@@ -190,7 +190,7 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
 
   }
 
-   
+
 
   def deleteLink(tag: String, child_tag: String) =
   {
@@ -199,11 +199,11 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
          (p.asset_tag === tag) and
          (p.child_tag === child_tag)
        }
-    } 
+    }
   }
-  def getHierarchyNode(asset: Asset):  Option[HierarchyNode] = 
+  def getHierarchyNode(asset: Asset):  Option[HierarchyNode] =
   {
-      val child_info = inTransaction { 
+      val child_info = inTransaction {
         from(tableDef)(a =>
           where(a.asset_tag === asset.tag)
           select(a)
@@ -216,7 +216,7 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
         case Some(parent_tag) =>  Asset.findByTag(parent_tag)
         case None =>  None
       }
-      
+
 
       var hierarchy = if ( child_info.isEmpty && parent.isEmpty )
       {
@@ -234,7 +234,7 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
 
   def findLink(assetTag: String, childTag: String): Option[HierarchyInfo] = {
     //getOrElseUpdate("HierarchyInfo.findByName(%s)".format(name.toUpperCase)) {
-      inTransaction { 
+      inTransaction {
         tableDef.where(a =>
           a.asset_tag === assetTag and
           a.child_tag === childTag
@@ -244,7 +244,7 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
 
   def findChildren(assetTag: String): List[String] = {
     //getOrElseUpdate("HierarchyInfo.findByName(%s)".format(name.toUpperCase)) {
-      inTransaction { 
+      inTransaction {
         from(tableDef)(a =>
           where(a.asset_tag === assetTag)
           select(a.child_tag)
@@ -254,7 +254,7 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
 
   def findParent(childTag: String): Option[String] = {
     //getOrElseUpdate("HierarchyInfo.findByName(%s)".format(name.toUpperCase)) {
-      inTransaction { 
+      inTransaction {
         from(tableDef)(a =>
           where(a.child_tag === childTag)
           select(a.asset_tag)
@@ -265,7 +265,7 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
 
   def getAllNodes(): List[HierarchyInfo] = {
     //getOrElseUpdate("HierarchyInfo.findByName(%s)".format(name.toUpperCase)) {
-       inTransaction { 
+       inTransaction {
         from(tableDef)(a =>
           select(a)
         ).toList

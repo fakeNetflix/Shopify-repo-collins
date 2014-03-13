@@ -15,21 +15,21 @@ object AuthenticationProviderSpec extends Specification with _root_.test.Resourc
       provider.authenticate("blake", "admin:first") must beSome[User]
       provider.authenticate("no", "suchuser") must beNone
     }
+    /*
     "work with file based auth" >> {
       val authFile = findResource("htpasswd_users")
       val configData = Map(
         "authentication.type" -> "file",
         "authentication.permissionsFile" -> "conf/permissions.yaml",
-        "authentication.file.userfile" -> authFile.getAbsolutePath
+        "authentication.basic.userfile" -> authFile.getAbsolutePath
       )
       val config = Configuration.from(configData)
       _root_.util.config.AppConfig.globalConfig = Some(config)
-      FileAuthenticationProviderConfig.initialize
-      val provider = AuthenticationProvider.get("file")
-      provider must haveClass[FileAuthenticationProvider]
+      val provider = AuthenticationProvider.get("basic")
+
       val users = Seq(
-        ("blake", "password123", Set("engineering")),
-        ("testuser", "FizzBuzzAbc", Set("ny","also"))
+        ("blake", "password123", "engineering"),
+        ("testuser", "FizzBuzzAbc", "ny,also")
       )
 
       users.foreach { case(username,password,roles) =>
@@ -37,12 +37,10 @@ object AuthenticationProviderSpec extends Specification with _root_.test.Resourc
         user must beSome[User]
         user.get.username mustEqual username
         user.get.password mustNotEqual password
-        user.get.isAuthenticated must beTrue
         user.get.roles mustEqual roles
       }
       provider.authenticate("blake", "abbazabba") must beNone
     }
-    /*
     "work with IPA authentication" >> {
       val configData = Map(
         "authentication.type" -> "ipa",
@@ -64,7 +62,6 @@ object AuthenticationProviderSpec extends Specification with _root_.test.Resourc
         user must beSome[User]
         user.get.username mustEqual username
         user.get.password mustNotEqual password
-        user.get.isAuthenticated must beTrue
         user.get.id mustEqual id
         user.get.roles must containAllOf(roles)
       }
@@ -91,7 +88,6 @@ object AuthenticationProviderSpec extends Specification with _root_.test.Resourc
         user must beSome[User]
         user.get.username mustEqual username
         user.get.password mustNotEqual password
-        user.get.isAuthenticated must beTrue
         user.get.id mustEqual id
         user.get.roles must containAllOf(roles)
       }

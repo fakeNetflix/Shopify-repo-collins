@@ -47,7 +47,7 @@ abstract class SecureAction(
   protected def request(): Request[AnyContent] = _request.get()
   protected def flash(): Flash = request.flash
 
-  private val _user = new AtomicReference[User](User.empty)
+  private val _user = new AtomicReference[User]
   private def setUser(u: User): Unit = _user.set(u)
   def user(): User = _user.get()
   def userOption(): Option[User] = user() match {
@@ -91,12 +91,18 @@ abstract class SecureAction(
   final override def parser: BodyParser[AnyContent] = BodyParsers.parse.anyContent
   final override def apply(req: Request[AnyContent]): AsyncResult = AsyncResult {
     setRequest(req)
-    checkAuthorization() match {
-      case Left(res) => PurePromise(res)
-      case Right(user) => {
-        setUser(user)
-        run()
+    if (securitySpecification.isSecure) {
+      checkAuthorization() match {
+        case Left(res) => PurePromise(res)
+        case Right(user) => {
+          setUser(user)
+          run()
+        }
       }
+    } else {
+      logger.debug("No authentication required for %s, processing action".format(request.path))
+      setUser(null)
+      run()
     }
   }
 
@@ -112,31 +118,26 @@ abstract class SecureAction(
 
   private def checkAuthorization(): Either[Result,User] = {
     val path = request.path
-    if (securitySpecification.isSecure) {
-      securityHandler.authenticate(request) match {
-        case None =>
-          logger.debug("Auth required and NOT successful for %s".format(path))
+    securityHandler.authenticate(request) match {
+      case None =>
+        logger.debug("Auth required and NOT successful for %s".format(path))
+        Left(securityHandler.onUnauthorized(request))
+      case Some(user) =>
+        logger.debug("Auth required for %s and requested by %s was successful".format(path, user.username))
+        if (!securitySpecification.requiresAuthorization) {
+          logger.debug("No credentials required for %s, processing action".format(path))
+          Right(user)
+        } else if (securityHandler.authorize(user, securitySpecification)) {
+          logger.debug("Credentials required and found for resource %s, user %s".format(
+            path, user.username
+          ))
+          Right(user)
+        } else {
+          logger.info("Credentials required for %s but not found for user %s".format(
+            path, user.username
+          ))
           Left(securityHandler.onUnauthorized(request))
-        case Some(user) =>
-          logger.debug("Auth required for %s and requested by %s was successful".format(path, user.username))
-          if (!securitySpecification.requiresAuthorization) {
-            logger.debug("No credentials required for %s, processing action".format(path))
-            Right(user)
-          } else if (securityHandler.authorize(user, securitySpecification)) {
-            logger.debug("Credentials required and found for resource %s, user %s".format(
-              path, user.username
-            ))
-            Right(user)
-          } else {
-            logger.info("Credentials required for %s but not found for user %s".format(
-              path, user.username
-            ))
-            Left(securityHandler.onUnauthorized(request))
-          }
-      }
-    } else {
-      logger.debug("No authentication required for %s, processing action".format(path))
-      Right(User.empty)
+        }
     }
   }
 

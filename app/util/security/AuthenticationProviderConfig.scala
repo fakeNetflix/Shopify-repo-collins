@@ -25,20 +25,6 @@ object AuthenticationProviderConfig extends Configurable {
   }
 }
 
-object FileAuthenticationProviderConfig extends Configurable {
-
-  override val namespace = "authentication.file"
-  override val referenceConfigFilename = "authentication_reference.conf"
-
-  def userfile = getString("userfile")(ConfigValue.Required).get
-
-  override protected def validateConfig() {
-    if (AuthenticationProviderConfig.authType == "file") {
-      File.requireFileIsReadable(userfile)
-    }
-  }
-}
-
 object LdapAuthenticationProviderConfig extends Configurable {
 
   override val namespace = "authentication.ldap"
@@ -71,21 +57,6 @@ object LdapAuthenticationProviderConfig extends Configurable {
       usersub
       groupsub
       groupAttribute
-    }
-  }
-}
-
-object GoogleAuthenticationProviderConfig extends Configurable {
-
-  override val namespace = "authentication.google"
-  override val referenceConfigFilename = "authentication_reference.conf"
-
-  def whitelistDomain = getString("whitelistDomain").getOrElse("")
-  def whitelistFile = getString("whitelistFile")(ConfigValue.Required).get
-
-  override protected def validateConfig() {
-    if (AuthenticationProviderConfig.authType == "google") {
-      File.requireFileIsReadable(whitelistFile)
     }
   }
 }

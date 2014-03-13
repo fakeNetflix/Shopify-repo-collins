@@ -1,23 +1,25 @@
 package util
 package security
 
-import models.{User, UserImpl}
+import models.User
 import java.net.URLEncoder
 import io.Source
 
 class GoogleAuthenticationProvider extends AuthenticationProvider {
   override val authType = "google"
 
-  override def authenticate(email: String, blank: String): Option[User] = {
-    None
+  override def authenticate(email: String, password: String): Option[User] = {
+    AuthenticationProvider.getUser(email, "google") match {
+      case None => None
+      case Some(u) => (AuthenticationProvider.hashPassword(password, u.salt) == u.password) match {
+        case true => Some(u)
+        case false => None
+      }
+    }
   }
 }
 
 object GoogleAuthenticationProvider {
-  val config = GoogleAuthenticationProviderConfig
-
-  lazy val whitelist = Source.fromFile(config.whitelistFile).getLines.toList
-
   def getRedirectURL(returnRoute: String, location: Option[Seq[String]]) = {
     val realm = returnRoute.substring(0, returnRoute.indexOf('/', 8) + 1)
     val return_to = returnRoute + (location match {
@@ -39,17 +41,11 @@ object GoogleAuthenticationProvider {
 
   def authenticate(email: String): Option[User] = {
     println("Email logged in: " + email)
-    if (config.whitelistDomain.length() == 0 || email.endsWith("@" + config.whitelistDomain)) {
-      println("Domain is whitelisted")
-      val username = email.substring(0, email.lastIndexOf('@'))
-      if (whitelist.contains(username)) {
-        println("User is on whitelist: " + username)
-        Some(UserImpl(username, "*", Set("engineering","Infra","ops"), 2000 + math.abs(email.hashCode() % 1000000), true))
-      } else {
-        None
-      }
-    } else {
-      None
+    AuthenticationProvider.getUser(email, "google") match {
+      case None => None
+      case Some(user) =>
+        println("User is whitelisted: " + email)
+        Some(user)
     }
   }
 

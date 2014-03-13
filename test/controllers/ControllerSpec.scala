@@ -1,6 +1,6 @@
 package controllers
 
-import models.{User, UserImpl}
+import models.User
 import play.api.mvc._
 import play.api.http.HeaderNames
 import play.api.templates.Txt
@@ -13,5 +13,5 @@ trait ControllerSpec {
       Results.Unauthorized(Txt("Invalid username/password specified"))
     }
   }
-  def getLoggedInUser(group: String) = Some(UserImpl("test", "*", Set(group), 123, true))
+  def getLoggedInUser(group: String) = Some(new User("test", "*", group, "mock"))
 }

@@ -1,7 +1,7 @@
 package util
 package security
 
-import models.{User, UserImpl}
+import models.User
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -64,7 +64,7 @@ class LdapAuthenticationProvider() extends AuthenticationProvider {
       val uid = getUid(getPrincipal(username), ctx)
       require(uid > 0, "Unable to find UID for user")
       val groups = getGroups(username, ctx)
-      val user = UserImpl(username, "*", groups.map { _._2 }.toSet, uid, true)
+      val user = new User(username, "*", groups.map { _._2 }.toSet.mkString(","), "ldap")
       logger.trace("Succesfully authenticated %s".format(username))
       Some(user)
     } catch {

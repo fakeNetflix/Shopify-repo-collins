@@ -97,12 +97,12 @@ trait SecureWebController extends SecureController {
   val unauthorizedRoute = routes.Application.login.url
   def securityMessage(req: RequestHeader) = ("security" -> "The specified resource requires additional authorization")
 
-  override def getUser(request: RequestHeader): User = User.fromMap(SessionStore.getSession(request)).get
+  override def getUser(request: RequestHeader): User = User.fromSession(SessionStore.getSession(request)).get
 
   override def onUnauthorized = Action { implicit request =>
     // If user is not logged in and accesses a page, store the location so they can be redirected
     // after authentication
-    if (User.fromMap(SessionStore.getSession(request)).isDefined) {
+    if (User.fromSession(SessionStore.getSession(request)).isDefined) {
       Results.Redirect("/").flashing(securityMessage(request))
     } else {
       if (request.path != "/login") {
@@ -114,14 +114,9 @@ trait SecureWebController extends SecureController {
   }
 
   /** Use sessions storage for authenticate/etc */
-  override def authenticate(request: RequestHeader) = User.fromMap(SessionStore.getSession(request)) match {
-    case Some(user) => user.isAuthenticated match {
-      case true =>
-        setUser(Some(user))
-      case false =>
-        logger.debug("SecureWebController.authenticate: user found, not authenticated")
-        setUser(None)
-    }
+  override def authenticate(request: RequestHeader) = User.fromSession(SessionStore.getSession(request)) match {
+    case Some(user) =>
+      setUser(Some(user))
     case None =>
       logger.debug("SecureWebController.authenticate: user not found, session data not found")
       setUser(None)
@@ -134,7 +129,7 @@ trait SecureApiController extends SecureController {
     Results.Unauthorized(Txt("Invalid Username/Password specified"))
   }
 
-  override def getUser(request: RequestHeader): User = User.fromMap(SessionStore.getSession(request)).get
+  override def getUser(request: RequestHeader): User = User.fromSession(SessionStore.getSession(request)).get
 
   /** Do not use session storage for authenticate */
   override def authenticate(request: RequestHeader): Option[User] = {
@@ -142,14 +137,9 @@ trait SecureApiController extends SecureController {
       case None =>
         logger.debug("Got API request with no auth header")
         setUser(None)
-        User.fromMap(SessionStore.getSession(request)) match {
-          case Some(user) => user.isAuthenticated match {
-              case true =>
-                setUser(Some(user))
-              case false =>
-                logger.debug("SecureWebController.authenticate: user found, not authenticated")
-                setUser(None)
-            }
+        User.fromSession(SessionStore.getSession(request)) match {
+          case Some(user) =>
+            setUser(Some(user))
           case None =>
             logger.debug("SecureWebController.authenticate: invalid session data")
             setUser(None)

@@ -22,7 +22,7 @@ import models._
 import util.security.SecuritySpec
 import views._
 import util.security._
-import models.{User, UserImpl}
+import models.User
 import util.security.MixedAuthenticationProvider.isTypeEnabled
 
 object Application extends SecureWebController {
@@ -59,12 +59,16 @@ object Application extends SecureWebController {
           BadRequest(html.login(formWithErrors.copy(data = tmp), isTypeEnabled("google")))
         },
         user => {
-          val u = User.toMap(User.authenticate(user._1, user._2))
+          val u = User.authenticate(user._1, user._2)
+          val session: Map[String,String] = u match {
+            case None => Map()
+            case Some(usr) => Map("uid" -> usr.id.toString)
+          }
           user._3 match {
             case Some(location) =>
-              SessionStore.withSession(Redirect(location), u)
+              SessionStore.withSession(Redirect(location), session)
             case None =>
-              SessionStore.withSession(Redirect(app.routes.Resources.index), u)
+              SessionStore.withSession(Redirect(app.routes.Resources.index), session)
           }
         }
       )
@@ -94,18 +98,18 @@ object Application extends SecureWebController {
           val authSuccess: AuthSuccess = verification.getAuthResponse().asInstanceOf[AuthSuccess]
           val fetchResp: FetchResponse = authSuccess.getExtension(AxMessage.OPENID_NS_AX).asInstanceOf[FetchResponse]
 
-          val u = User.toMap(GoogleAuthenticationProvider.authenticate(fetchResp.getAttributeValue("email")))
-          if (u.isEmpty) {
-            Redirect(routes.Application.login).flashing(
-              "security" -> "You do not have permission to use collins."
-            )
-          } else {
-            req.session.get("location") match {
-              case None | Some("") =>
-                  SessionStore.withSession(Redirect(app.routes.Resources.index), u)
-              case Some(location) =>
-                  SessionStore.withSession(Redirect(location), u)
-            }
+          val u = GoogleAuthenticationProvider.authenticate(fetchResp.getAttributeValue("email"))
+          u match {
+            case None => Redirect(routes.Application.login).flashing(
+                "security" -> "You do not have permission to use collins."
+              )
+            case Some(usr) =>
+              req.session.get("location") match {
+                case None | Some("") =>
+                    SessionStore.withSession(Redirect(app.routes.Resources.index), Map("uid" -> usr.id.toString))
+                case Some(location) =>
+                    SessionStore.withSession(Redirect(location), Map("uid" -> usr.id.toString))
+              }
           }
         } else {
           Redirect(routes.Application.login).flashing(

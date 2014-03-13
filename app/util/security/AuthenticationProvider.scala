@@ -1,14 +1,17 @@
 package util
 package security
 
-import models.{User, UserImpl}
+import models.User
 import collins.cache.ConfigCache
 import collins.validation.File
 
+import sun.misc.BASE64Encoder
+import java.security.MessageDigest
 import play.api.Logger
 import com.google.common.cache._
 import java.util.concurrent.TimeUnit
 import collins.permissions.{PermissionsHelper, Privileges}
+import org.squeryl.PrimitiveTypeMode._
 
 trait AuthenticationProvider {
   protected val logger = Logger.logger
@@ -81,12 +84,12 @@ object AuthenticationProvider {
     if (concern == SecuritySpec.LegacyMarker) {
       logger.debug("Found legacy security spec, defaulting to basic roles")
       loggedAuth {
-        user.roles.map(_.toLowerCase).intersect(spec.requiredCredentials.map(_.toLowerCase)).size > 0
+        user.rolesSet.map(_.toLowerCase).intersect(spec.requiredCredentials.map(_.toLowerCase)).size > 0
       }
     } else {
       logger.trace("Have concern '%s'".format(concern))
       loggedAuth {
-        user.roles
+        user.rolesSet
           .find { role =>
             val perm = p.groupHasPermission(role, concern)
             logger.debug("Checking group permission for role %s concern %s was %s".format(
@@ -102,6 +105,21 @@ object AuthenticationProvider {
           }
       }
     }
+  }
+
+  def getUser(username: String, auth_type: String): Option[User] = {
+    transaction {
+      val query = User.users.where(u => u.username === username and u.auth_type === auth_type)
+      query.isEmpty match {
+        case true => None
+        case false => Some(query.single)
+      }
+    }
+  }
+
+  // This is consistent with how apache encrypts SHA1 if the salt is blank
+  def hashPassword(password: String, salt: String): String = {
+    "{SHA}" + new BASE64Encoder().encode(MessageDigest.getInstance("SHA1").digest((password + salt).getBytes()))
   }
 
   private def loggedAuth(f: => Boolean): Boolean = {

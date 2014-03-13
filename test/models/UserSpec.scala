@@ -15,11 +15,10 @@ object UserSpec extends Specification {
       }
     }
     "serialize/deserialize" in {
-      val u = UserImpl("blake", "*", Set("engineering"), 125, true)
+      val u = new User("blake", "*", "engineering", "mock")
       val uMap = u.toMap()
       val newU = User.fromMap(uMap).get
       newU.username mustEqual u.username
-      newU.isAuthenticated mustEqual u.isAuthenticated
       newU.id mustEqual u.id
       newU.roles mustEqual u.roles
     }
