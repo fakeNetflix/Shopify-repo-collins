@@ -1,6 +1,7 @@
 @(aa: models.asset.AllAttributes, user: User)(implicit flash: Flash, req: Request[AnyContent])
 
 @import helper._
+@import models.HierarchyInfo
 
 <!-- Start hierarchy Info -->
 <div class="tab-pane" id="hierarchy">
@@ -12,7 +13,7 @@
     <tr>
         <th>Parent:</th>
         @if(aa.hierarchy.get.parent.nonEmpty){
-            <th colspan="2"><a href=@{"/asset/"+aa.hierarchy.get.parent.get.tag+"#hierarchy"}>@aa.hierarchy.get.parent.get.tag</a></th>
+            <th colspan="2">@{aa.hierarchy.get.parent.get.getType.label}: <a href=@{"/asset/"+aa.hierarchy.get.parent.get.tag+"#hierarchy"}>@aa.hierarchy.get.parent.get.tag</a></th>
         }else{
             <td>Asset has no parent</td><td></td><td></td>
         }
@@ -20,11 +21,15 @@
 
     @if(aa.hierarchy.get.asset_info.nonEmpty){
     <tr>
-        @if(!aa.hierarchy.get.getRuCount.isEmpty){
-            <th>RU</th>
-        }
-            <th>Child Label</th><th>Child Tag</th>
-        </tr>
+      @if(!aa.hierarchy.get.getRuCount.isEmpty){
+        <th>RU</th>
+      }
+      <th>Asset Tag</th><th>Type</th>
+      @if(aa.asset.getType.toString == "RACK" || aa.asset.getType.toString == "SERVER_CHASSIS"){
+      <th>Hostname</th><th>IPs</th><th>IPMI</th>
+      }
+      <th>Links</th>
+    </tr>
         @for( c <- aa.hierarchy.get.getDisplayTable.sortWith(_.end_index > _.end_index)){
 
             <tr>
@@ -32,11 +37,26 @@
                     <th>@c.end_index</th>
                 }
 
-                @if(!c.info.isEmpty && c.info.get.child_end == c.end_index ){
-                    <td units=@c.info_span>@c.info.get.child_label</td>
-                    <td units=@c.info_span><a href=@{"/asset/"+c.info.get.child_tag+"#hierarchy"}>@c.info.get.child_tag</a></td>
+                @if(c.info.nonEmpty && c.info.get.child_end == c.end_index ){
+                    <td units=@c.info_span>@c.asset_tag.get </td>
+                    <td units=@c.info_span>@{Asset.findByTag(c.asset_tag.get).get.getType.label} </td>
+                    @if(aa.asset.getType.toString == "RACK" || aa.asset.getType.toString == "SERVER_CHASSIS"){
+                      @if(c.node_info.nonEmpty){
+                        <td units=@c.info_span>@c.node_info.get.hostname</td> 
+                        <td units=@c.info_span>@c.node_info.get.ip_address</td> 
+                        <td units=@c.info_span>@c.node_info.get.ipmi_address</td>
+                      }else{
+                        <td units=@c.info_span></td>
+                        <td units=@c.info_span></td>
+                        <td units=@c.info_span></td>
+                      }
+                    }
+                    <td units=@c.info_span><a href=@{"/asset/"+c.asset_tag.get}>Info</a>
+                    @if(HierarchyInfo.findChildren(c.info.get.child_id).length > 0){
+                     <a href=@{"/asset/"+c.asset_tag.get+"#hierarchy"}>Browse</a>
+                    }</td>
                 }else{
-                    <td></td><td></td>
+                    <td></td><td></td><td></td>
                 }
 
             </tr>

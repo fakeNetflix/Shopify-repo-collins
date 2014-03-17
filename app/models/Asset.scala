@@ -196,6 +196,13 @@ object Asset extends Schema with AnormAdapter[Asset] {
     }
   }
 
+  def findByTypeName(typeName: String): List[Asset] = {
+    val assetType = AssetType.findByName(typeName).get.getId
+    inTransaction {
+      tableDef.where(a=> a.asset_type === assetType)toList
+    }
+  }
+
   /**
    * Finds assets across multiple collins instances.  Data for instances are
    * stored as assets themselves, though the asset type and attribute for URI

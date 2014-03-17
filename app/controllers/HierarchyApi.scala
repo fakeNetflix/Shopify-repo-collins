@@ -16,15 +16,14 @@ trait HierarchyApi {
   this: Api with SecureController =>
 
 
-  case class HierarchyForm( child_tag: String, child_label: String, start: Option[Int] = None, end: Option[Int]) {
+  case class HierarchyForm( child_tag: String,  start: Option[Int] = None, end: Option[Int]) {
     def merge(asset: Asset) =  {
-      HierarchyInfo.createOrUpdate(asset,child_tag,child_label=Some(child_label), child_start=start, child_end = end)
+      HierarchyInfo.createOrUpdate(asset,child_tag, child_start=start, child_end = end)
     }
   }
   val HIERARCHY_FORM = Form(
     mapping(
       "child" -> text,
-      "label" -> text,
       "start" -> optional(number),
       "end" -> optional(number) 
     )(HierarchyForm.apply)(HierarchyForm.unapply)
@@ -59,20 +58,24 @@ trait HierarchyApi {
 
 
   def deleteHierarchyLink(tag: String, child_tag: String ) = SecureAction { implicit req =>
-    HierarchyInfo.deleteLink(tag, child_tag)
+    val asset = Asset.findByTag(tag).get
+    val child = Asset.findByTag(child_tag).get
+    HierarchyInfo.deleteLink(asset.id, child.id)
     val js = JsObject(Seq("SUCCESS" -> JsBoolean(true)))
     formatResponseData(ResponseData(Results.Ok, JsObject(Seq("SUCCESS" -> JsBoolean(true)))))
   }(Permissions.HierarchyApi.UpdateHierarchy)
 
   def getChildren(tag: String) = SecureAction { implicit req =>
-    var children = HierarchyInfo.findChildren(tag)
-    val js = JsObject(Seq("values" -> JsArray(children.map(JsString(_)))))
+    var asset = Asset.findByTag(tag).get
+    var children = HierarchyInfo.findChildren(asset.id)
+    val js = JsObject(Seq("values" -> JsArray(children.map(JsNumber(_)))))
     formatResponseData(ResponseData(Results.Ok,js))
   }(Permissions.HierarchyApi.UpdateHierarchy)
 
   def getParent(tag: String) = SecureAction { implicit req =>
-    var parent = HierarchyInfo.findParent(tag).getOrElse("None")
-    val js = JsObject(Seq("values" -> JsString(parent)))
+    var asset = Asset.findByTag(tag).get
+    var parent = HierarchyInfo.findParent(asset.id).get
+    val js = JsObject(Seq("values" -> (JsNumber(parent))))
     formatResponseData(ResponseData(Results.Ok, js ))
   }(Permissions.HierarchyApi.UpdateHierarchy)
   

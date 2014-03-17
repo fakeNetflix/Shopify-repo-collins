@@ -75,16 +75,6 @@
             <span class="icon-bar"></span>
           </div>
           <a class="brand" href="@app.routes.Resources.index">Collins</a>
-          <div class="nav-collapse collapse">
-            <form action="@routes.Application.authenticate" method="post" class="navbar-form pull-right">
-              <input class="input-medium" type="text" name="username" placeholder="Username">
-              <input class="input-medium" type="password" name="password" placeholder="Password">
-              <button class="btn" type="submit">Sign in</button>
-              @if(isOpenId) {
-                <button class="btn" name="google" type="submit">Sign in with Google</button>
-              }
-            </form>
-          </div>
         </div>
       </div>
     </div>

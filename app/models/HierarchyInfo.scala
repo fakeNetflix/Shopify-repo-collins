@@ -7,11 +7,18 @@ import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.{Schema, Table}
 import collins.solr._
 
+case class ServerNodeInfo(
+  hostname: String,
+  ip_address: String,
+  ipmi_address: String
 
-                //<th>@c.child_label</th><th><a href=@{"/asset/"+c.child_tag+"#hierarchy"}>@c.child_tag</a></th></tr>
+)
+
 case class HierarchyTableRow(
   end_index: Int,
+  asset_tag: Option[String],
   info: Option[HierarchyInfo],
+  node_info: Option[ServerNodeInfo],
   info_span: Int
 )
 
@@ -19,6 +26,21 @@ case class HierarchyNode(
   asset_info: List[HierarchyInfo],
   parent: Option[Asset]
 ){
+
+
+  def getServerNodeInfo( asset: Asset ): ServerNodeInfo = {
+    val aa = asset.getAllAttributes
+    val hostname = aa.mvs.filter(_.getName() == "HOSTNAME") match {
+        case Nil => "none"
+        case x  => x.head.toString
+    }
+
+    val ips = aa.addresses.map(_.dottedAddress).toList.mkString(" , ")
+    val ipmi = aa.ipmi.get.dottedAddress()
+    ServerNodeInfo( hostname, ips, ipmi )
+  }
+
+
 
   def getDisplayTable(): List[HierarchyTableRow] = {
     var tableRows = List[HierarchyTableRow]()
@@ -29,19 +51,45 @@ case class HierarchyNode(
 
       for (i<- 1 to ru_count.get)
       {
-        var asset = asset_info.find(_.child_end == i)
+        var asset_data = asset_info.find(_.child_end == i)
 
-        val row = asset match{
-          case Some(asset) => { HierarchyTableRow(i, Some(asset), (asset.child_end - asset.child_start + 1))}
-          case None => { HierarchyTableRow(i, None, 1 )}
+
+        // Need to check if asset is server_node
+        val row = asset_data match{
+          case Some(asset_data) => {
+            val asset = Asset.findById(asset_data.child_id).get
+            val tag = Some(asset.tag)
+            val span = (asset_data.child_end - asset_data.child_start + 1)
+
+            val asset_type = asset.getType().toString
+
+            val node_info = asset_type match {
+              case "SERVER_NODE" => { Some(getServerNodeInfo(asset)) }
+              case _ => { None }
+              }
+
+            HierarchyTableRow(i, tag, Some(asset_data), node_info, span )
+          }
+          case None => { HierarchyTableRow(i, None, None, None, 1 )}
         }
         tableRows ::= row
       }
     }
     else
     {
-      for( asset <- asset_info){
-        val row  = HierarchyTableRow(-1, Some(asset), 1)
+      for( asset_data <- asset_info){
+
+
+        val asset = Asset.findById(asset_data.child_id).get
+        val tag = Some(asset.tag)
+        val asset_type = asset.getType().toString
+                    
+        val node_info = asset_type match {
+          case "SERVER_NODE" => { Some(getServerNodeInfo(asset)) }
+          case _ => { None }
+        }
+
+        val row = HierarchyTableRow(-1, tag, Some(asset_data), node_info,  1 )
         tableRows ::= row
       }
 
@@ -55,7 +103,7 @@ case class HierarchyNode(
 
     if(asset_info.length >0){
 
-        val asset =  Asset.findByTag(asset_info.head.asset_tag)
+        val asset =  Asset.findById(asset_info.head.asset_id)
 
         val attrs = asset.get.getAllAttributes
         val ru_check = attrs.mvs.find(_.getName == "RU_COUNT")
@@ -71,9 +119,8 @@ case class HierarchyNode(
 }
 
 case class HierarchyInfo(
-    asset_tag: String,
-    child_tag: String,
-    child_label: String,
+    asset_id: Long,
+    child_id: Long,
     child_start: Int,
     child_end: Int,
     id: Long = 0,
@@ -97,10 +144,9 @@ case class HierarchyInfo(
   def asJsonObj: JsObject = {
     JsObject(Seq(
       "ID" -> JsNumber(id),
-      "ASSET" -> JsString(asset_tag),
+      "ASSET" -> JsNumber(asset_id),
       "PRIORITY" -> JsNumber(priority),
-      "CHILD_LABEL" -> JsString(child_label),
-      "CHILD_TAG" -> JsString(child_tag),
+      "CHILD_TAG" -> JsNumber(child_id),
       "CHILD_START" -> JsNumber(priority),
       "CHILD_END" -> JsNumber(priority)
     ))
@@ -171,15 +217,16 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
 
 
   // updaote not supported yet
-  def createOrUpdate(asset: Asset, child_tag: String, child_label: Option[String] = None,  child_start: Option[Int] = None, child_end: Option[Int] = None) =
+  def createOrUpdate(asset: Asset, child_tag: String,  child_start: Option[Int] = None, child_end: Option[Int] = None) =
   {
-    val existing = findLink(asset.tag, child_tag).getOrElse{
+    val child = Asset.findByTag(child_tag).get // this could be bad
+
+    val existing = findLink(asset.id, child.id).getOrElse{
       inTransaction
       {
         create(HierarchyInfo(
-            asset_tag = asset.tag,
-            child_tag = child_tag,
-            child_label = child_label.getOrElse(child_tag),
+            asset_id = asset.id,
+            child_id = child.id,
             child_start = child_start.getOrElse(-1),
             child_end = child_end.getOrElse(-1),
             priority = -1
@@ -192,12 +239,12 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
 
 
 
-  def deleteLink(tag: String, child_tag: String) =
+  def deleteLink(id: Long, child_id: Long) =
   {
     inTransaction {
        val results = tableDef.deleteWhere { p =>
-         (p.asset_tag === tag) and
-         (p.child_tag === child_tag)
+         (p.asset_id === id) and
+         (p.child_id === child_id)
        }
     }
   }
@@ -205,15 +252,15 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
   {
       val child_info = inTransaction {
         from(tableDef)(a =>
-          where(a.asset_tag === asset.tag)
+          where(a.asset_id === asset.id)
           select(a)
         ).toList
       }
 
-      val parent_tag =  findParent(asset.tag)
+      val parent_id =  findParent(asset.id)
 
-      val parent = parent_tag match {
-        case Some(parent_tag) =>  Asset.findByTag(parent_tag)
+      val parent = parent_id match {
+        case Some(parent_id) =>  Asset.findById(parent_id)
         case None =>  None
       }
 
@@ -232,32 +279,30 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
 
   override def get(a: HierarchyInfo) = findById(a.id).get
 
-  def findLink(assetTag: String, childTag: String): Option[HierarchyInfo] = {
-    //getOrElseUpdate("HierarchyInfo.findByName(%s)".format(name.toUpperCase)) {
+  def findLink(assetId: Long, childId: Long): Option[HierarchyInfo] = {
       inTransaction {
         tableDef.where(a =>
-          a.asset_tag === assetTag and
-          a.child_tag === childTag
+          a.asset_id === assetId and
+          a.child_id === childId
         ).headOption
     }
   }
 
-  def findChildren(assetTag: String): List[String] = {
-    //getOrElseUpdate("HierarchyInfo.findByName(%s)".format(name.toUpperCase)) {
+  def findChildren(assetId: Long): List[Long] = {
       inTransaction {
         from(tableDef)(a =>
-          where(a.asset_tag === assetTag)
-          select(a.child_tag)
+          where(a.asset_id === assetId)
+          select(a.child_id)
         ).toList
     }
   }
 
-  def findParent(childTag: String): Option[String] = {
+  def findParent(childId: Long): Option[Long] = {
     //getOrElseUpdate("HierarchyInfo.findByName(%s)".format(name.toUpperCase)) {
       inTransaction {
         from(tableDef)(a =>
-          where(a.child_tag === childTag)
-          select(a.asset_tag)
+          where(a.child_id === childId)
+          select(a.asset_id)
         ).headOption
       }
 
