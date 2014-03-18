@@ -29,12 +29,20 @@
     <div class="row">
       <div class="span6">
         @formField {
-          @formLabel("tag", "Asset Tag")
+          @formLabel("tag", "Inventory Tag")
           @formInput {
             <input type="text" class="focus" id="tag" name="tag" tabindex="1" autocomplete="off">
             <span class="help-inline"><i class="icon-question-sign" data-rel="tooltip" title="Unique identifier for asset"></i></span>
           }
           }
+
+        @formField {
+          @formLabel("MAINTENANCE_TAG", "Maintenance Tag")
+          @formInput {
+            <input type="text" id="MAINTENANCE_TAG" name="MAINTENANCE_TAG" tabindex="2" >
+            <span class="help-inline"><i class="icon-question-sign" data-rel="tooltip" title="Maintenance tag of asset"></i></span>
+          }
+        }
 
         @formField {
           @formLabel("hostname", "Hostname")
