@@ -17,6 +17,7 @@ import org.openid4java.OpenIDException
 import org.openid4java.discovery.DiscoveryInformation
 import org.openid4java.discovery.Identifier
 import collection.JavaConversions._
+import org.squeryl.PrimitiveTypeMode._
 
 import models._
 import util.security.SecuritySpec
@@ -39,6 +40,53 @@ object Application extends SecureWebController {
           User.authenticate(username, password).isDefined
       })
   )
+
+  val accountForm = Form(
+    tuple(
+      "password" -> optional(text),
+      "new_password" -> nonEmptyText(3),
+      "new_password2" -> text
+    ) verifying ("Passwords do not match", result => result match {
+      case(password,new_password,new_password2) => new_password == new_password2
+    })
+  )
+
+  def account = Action { implicit req =>
+    val user = User.fromSession(SessionStore.getSession(req))
+    user match {
+      case None => Redirect(routes.Application.login)
+      case Some(u) => Ok(html.account(accountForm, u, u.auth_type != "google"))
+    }
+  }
+
+  def updateAccount = Action { implicit req =>
+    val user = User.fromSession(SessionStore.getSession(req))
+    user match {
+      case None => Redirect(routes.Application.login)
+      case Some(u) =>
+        accountForm.bindFromRequest.fold(
+          formWithErrors => {
+            val tmp: Map[String,String] = formWithErrors.data - "password"
+            BadRequest(html.account(formWithErrors.copy(data = tmp), u, u.auth_type != "google"))
+          },
+          account => {
+            if (u.auth_type != "google" && User.authenticate(u.username, account._1.getOrElse("")).isEmpty) {
+              BadRequest(html.account(accountForm, u, u.auth_type != "google")).flashing(
+                "security" -> "Current password is invalid"
+              )
+            } else {
+              u.resetSalt()
+              u.password = AuthenticationProvider.hashPassword(account._2, u.salt)
+              transaction { User.users.update(u) }
+
+              Redirect(routes.Application.account).flashing(
+                "success" -> "Your account has been updated"
+              )
+            }
+          }
+        )
+    }
+  }
 
   def login = Action { implicit req =>
     setUser(None)

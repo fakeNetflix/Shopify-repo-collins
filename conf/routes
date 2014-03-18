@@ -40,6 +40,8 @@ GET     /login                      controllers.Application.login
 POST    /login                      controllers.Application.authenticate
 GET     /openid                     controllers.Application.openid
 GET     /logout                     controllers.Application.logout
+GET     /account                    controllers.Application.account
+POST    /account                    controllers.Application.updateAccount
 
 # API
 

@@ -16,11 +16,11 @@ case class UserException(message: String) extends Exception(message)
 
 class User(
     val username: String,
-    val password: String,
+    var password: String,
     val roles: String,
     @Column("type")
     val auth_type: String,
-    val salt: String = new BigInteger(130, User.random).toString(32),
+    var salt: String = new BigInteger(130, User.random).toString(32),
     val id: Long = 0
   ) extends KeyedEntity[Long] {
   def authenticate(username: String, password: String) = User.authenticate(username, password)
@@ -33,6 +33,9 @@ class User(
   def isEmpty(): Boolean = username.isEmpty && password.isEmpty && roles.isEmpty
   def canSeePasswords(): Boolean = Permissions.please(this, Permissions.Feature.CanSeePasswords)
   def isAdmin(): Boolean = hasRole("infra")
+  def resetSalt() {
+    salt = new BigInteger(130, User.random).toString(32)
+  }
 }
 
 object User extends Schema {

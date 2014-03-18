@@ -1,0 +1,32 @@
+@(accountForm: Form[(Option[String], String, String)], user: User, requiresCurrentPass: Boolean)(implicit flash: Flash, req: Request[AnyContent])
+
+@import twitterBootstrap._
+@import helper._
+@import util.notice
+
+@main("Account") {
+<div class="page-header"><h1>Account</h1></div>
+<div class="row">
+  <div class="span12">
+    @notice("success")
+    @notice("security", Some("error"))
+
+    @form(routes.Application.updateAccount, 'class -> "form-horizontal") {
+      @accountForm.globalError.map { error =>
+      <div class="alert alert-error">
+        <strong>Unable to update account</strong><br>@error.message
+      </div>
+      }
+      <div class="control-group"><label class="control-label" style="padding-top:0px;">Username</label><div class="controls">@user.username</div></div>
+      @if(requiresCurrentPass) {
+        @inputPassword(accountForm("password"), '_label -> "Current Password")
+      }
+      @inputPassword(accountForm("new_password"), '_label -> "New Password")
+      @inputPassword(accountForm("new_password2"), '_label -> "Confirm New Password")
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Update Account</button>
+      </div>
+    }
+  </div>
+</div>
+}
