@@ -144,11 +144,13 @@ case class HierarchyInfo(
   def asJsonObj: JsObject = {
     JsObject(Seq(
       "ID" -> JsNumber(id),
-      "ASSET" -> JsNumber(asset_id),
+      "ASSET" -> JsString(Asset.findById(asset_id).get.tag),
+      "ASSET_ID" -> JsNumber(asset_id),
       "PRIORITY" -> JsNumber(priority),
-      "CHILD_TAG" -> JsNumber(child_id),
-      "CHILD_START" -> JsNumber(priority),
-      "CHILD_END" -> JsNumber(priority)
+      "CHILD_TAG" -> JsString(Asset.findById(child_id).get.tag),
+      "CHILD_ID" -> JsNumber(child_id),
+      "CHILD_START" -> JsNumber(child_start),
+      "CHILD_END" -> JsNumber(child_end)
     ))
   }
   def getId(): Long = id
@@ -219,6 +221,7 @@ object HierarchyInfo extends Schema with AnormAdapter[HierarchyInfo] {
   // updaote not supported yet
   def createOrUpdate(asset: Asset, child_tag: String,  child_start: Option[Int] = None, child_end: Option[Int] = None) =
   {
+   logger.debug( "Got tag %s".format(child_tag) )
     val child = Asset.findByTag(child_tag).get // this could be bad
 
     val existing = findLink(asset.id, child.id).getOrElse{

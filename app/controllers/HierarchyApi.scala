@@ -16,14 +16,14 @@ trait HierarchyApi {
   this: Api with SecureController =>
 
 
-  case class HierarchyForm( child_tag: String,  start: Option[Int] = None, end: Option[Int]) {
+  case class HierarchyForm( child_tag: String,  start: Option[Int] = None, end: Option[Int] = None) {
     def merge(asset: Asset) =  {
       HierarchyInfo.createOrUpdate(asset,child_tag, child_start=start, child_end = end)
     }
   }
   val HIERARCHY_FORM = Form(
     mapping(
-      "child" -> text,
+      "child_tag" -> text,
       "start" -> optional(number),
       "end" -> optional(number) 
     )(HierarchyForm.apply)(HierarchyForm.unapply)
