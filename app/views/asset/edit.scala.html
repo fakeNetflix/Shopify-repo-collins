@@ -15,7 +15,7 @@
        </thead>
        <tbody id='metatable'>
 
-          @MetaValueOrderer.order(aa.mvs.filter(_.getName() != "HOSTNAME")).map { case(size, mv) =>
+          @MetaValueOrderer.order(aa.mvs.filter(_.getName() != "")).map { case(size, mv) =>
           <tr target=@mv.getName>
             <td> <i type="state" class="icon-ok-sign"></i></td>
             <th type="name" >@mv.getLabel() @if(size > 1 || mv.getGroupId() != 0){(@mv.getGroupId())}</th>
