@@ -24,7 +24,7 @@
       @if(!aa.hierarchy.get.getRuCount.isEmpty){
         <th>RU</th>
       }
-      <th>Asset Tag</th><th>Type</th>
+      <th>Type</th><th>Maintenance Tag</th>
       @if(aa.asset.getType.toString == "RACK" || aa.asset.getType.toString == "SERVER_CHASSIS"){
       <th>Hostname</th><th>IPs</th><th>IPMI</th>
       }
@@ -38,14 +38,46 @@
                 }
 
                 @if(c.info.nonEmpty && c.info.get.child_end == c.end_index ){
-                    <td units=@c.info_span>@c.asset_tag.get </td>
                     <td units=@c.info_span>@{Asset.findByTag(c.asset_tag.get).get.getType.label} </td>
                     @if(aa.asset.getType.toString == "RACK" || aa.asset.getType.toString == "SERVER_CHASSIS"){
                       @if(c.node_info.nonEmpty){
-                        <td units=@c.info_span>@c.node_info.get.hostname</td> 
-                        <td units=@c.info_span>@c.node_info.get.ip_address</td> 
-                        <td units=@c.info_span>@c.node_info.get.ipmi_address</td>
+                        @if(Asset.findByTag(c.asset_tag.get).get.getType.toString == "SERVER_CHASSIS"){
+                          <td units=@c.info_span>@c.node_info.get.maintenance_tag 
+                          @if(c.node_info.get.nodes.nonEmpty){
+                            </br>
+                            @for( node <- c.node_info.get.nodes.get ){
+                              @node.maintenance_tag </br>
+                            }
+                            </td>
+                            <td units=@c.info_span >
+                            </br>
+                            @for( node <- c.node_info.get.nodes.get ){
+                              @node.hostname </br>
+                            }
+                            </td>
+                            <td units=@c.info_span >
+                            </br>
+                            @for( node <- c.node_info.get.nodes.get ){
+                              @node.ip_address </br>
+                            }
+                            </td>
+                            <td units=@c.info_span >
+                            </br>
+                            @for( node <- c.node_info.get.nodes.get ){
+                              @node.ipmi_address </br>
+                            }
+                            </td>
+                          }else{
+                            </td>
+                          }
+                        }else{
+                          <td units=@c.info_span>@c.node_info.get.maintenance_tag </td>
+                          <td units=@c.info_span>@c.node_info.get.hostname</td> 
+                          <td units=@c.info_span>@c.node_info.get.ip_address</td> 
+                          <td units=@c.info_span>@c.node_info.get.ipmi_address</td>
+                        }
                       }else{
+                        <td units=@c.info_span></td>
                         <td units=@c.info_span></td>
                         <td units=@c.info_span></td>
                         <td units=@c.info_span></td>
@@ -56,7 +88,7 @@
                      <a href=@{"/asset/"+c.asset_tag.get+"#hierarchy"}>Browse</a>
                     }</td>
                 }else{
-                    <td></td><td></td><td></td>
+                    <td></td><td></td><td></td> <td></td><td></td><td></td>
                 }
 
             </tr>

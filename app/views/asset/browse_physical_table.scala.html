@@ -1,0 +1,56 @@
+@(user: User)(implicit flash: Flash, req: Request[AnyContent])
+
+@import models.Asset
+@import _root_.util.config.Feature
+@import _root_.util.plugins.SoftLayer
+@import _root_.util.views.{MetaValueOrderer, TagDecorator, Titler}
+
+@main("Browse Assets By Rack") {
+<div class="row">
+
+
+@for( asset <- Asset.findByTypeName("RACK"); aa=asset.getAllAttributes ){
+
+  <h2>@asset.tag</h2>
+  @show_hierarchy(aa, user)
+}
+
+</div>
+
+<script>
+
+$( document ).ready(function() {
+
+    //hide unmerged cells
+    var rows = $("table").find("tr").toArray()
+
+    for (var i = 0; i < rows.length; i++)
+    {
+        var row = rows[i]
+
+        for (var j = 0; j < row.children.length; j++)
+        {
+            cell = row.children[j]
+            if (cell.hasAttribute('units'))
+            {
+                var units = cell.getAttribute('units');
+                $(cell).attr('rowspan',units);
+                $(cell).addClass('full');
+
+                for ( var k =  1; k < units; k++  )
+                {
+
+                    var nextRow = rows[i+k]
+                    var remove = nextRow.children[j]
+                    $(remove).hide()
+                }
+            }
+
+        }
+    }
+
+});
+
+</script>
+
+}

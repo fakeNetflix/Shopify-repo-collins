@@ -46,7 +46,7 @@ case class BrowsePhysicalTableAction(
 
   override def execute(rd: RequestDataHolder) = {
       Status.Ok(
-        views.html.resources.browse_physical_table(user )(flash, request)
+        views.html.asset.browse_physical_table(user )(flash, request)
       ) 
   }
 

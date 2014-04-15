@@ -7,10 +7,12 @@ import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.{Schema, Table}
 import collins.solr._
 
-case class ServerNodeInfo(
-  hostname: String,
-  ip_address: String,
-  ipmi_address: String
+case class RackUnitInfo(
+  maintenance_tag: String,
+  hostname: Option[String],
+  ip_address: Option[String],
+  ipmi_address: Option[String],
+  nodes: Option[List[RackUnitInfo]]
 
 )
 
@@ -18,7 +20,7 @@ case class HierarchyTableRow(
   end_index: Int,
   asset_tag: Option[String],
   info: Option[HierarchyInfo],
-  node_info: Option[ServerNodeInfo],
+  node_info: Option[RackUnitInfo],
   info_span: Int
 )
 
@@ -28,18 +30,60 @@ case class HierarchyNode(
 ){
 
 
-  def getServerNodeInfo( asset: Asset ): ServerNodeInfo = {
+  def getServerNodeInfo( asset: Asset ): RackUnitInfo = {
     val aa = asset.getAllAttributes
     val hostname = aa.mvs.filter(_.getName() == "HOSTNAME") match {
         case Nil => "none"
         case x  => x.head.toString
     }
 
+    val maint_tag = aa.mvs.filter(_.getName() == "MAINTENANCE_TAG") match {
+        case Nil => "UNKNOWN"
+        case x  => x.head.toString
+    }
+
     val ips = aa.addresses.map(_.dottedAddress).toList.mkString(" , ")
     val ipmi = aa.ipmi.get.dottedAddress()
-    ServerNodeInfo( hostname, ips, ipmi )
+    RackUnitInfo(maint_tag, Some(hostname), Some(ips), Some(ipmi), None )
   }
 
+
+  def getServerChassisInfo( asset: Asset ): RackUnitInfo = {
+    var children = HierarchyInfo.findChildren(asset.id)
+    var nodes = List[RackUnitInfo]()
+
+    val aa = asset.getAllAttributes
+    val maint_tag = aa.mvs.filter(_.getName() == "MAINTENANCE_TAG") match {
+        case Nil => "UNKNOWN"
+        case x  => x.head.toString
+    }
+
+
+    for( child <- children ){
+      var asset = Asset.findById(child).get
+      var node_info = getServerNodeInfo(asset)
+      nodes ::= node_info
+    }
+    RackUnitInfo(maint_tag, None, None, None, Some(nodes) )
+  }
+
+  def getGenericInfo( asset: Asset): RackUnitInfo = {
+    val aa = asset.getAllAttributes
+    val hostname = aa.mvs.filter(_.getName() == "HOSTNAME") match {
+        case Nil => ""
+        case x  => x.head.toString
+    }
+
+    val maint_tag = aa.mvs.filter(_.getName() == "MAINTENANCE_TAG") match {
+        case Nil => "UNKNOWN"
+        case x  => x.head.toString
+    }
+    val asset_type = asset.getType().toString
+
+    val ips = aa.addresses.map(_.dottedAddress).toList.mkString(" , ")
+    RackUnitInfo(maint_tag, Some(hostname), Some(ips), None, None )
+
+  }
 
 
   def getDisplayTable(): List[HierarchyTableRow] = {
@@ -65,7 +109,8 @@ case class HierarchyNode(
 
             val node_info = asset_type match {
               case "SERVER_NODE" => { Some(getServerNodeInfo(asset)) }
-              case _ => { None }
+              case "SERVER_CHASSIS" => { Some(getServerChassisInfo(asset)) }
+              case _ => { Some(getGenericInfo(asset)) }
               }
 
             HierarchyTableRow(i, tag, Some(asset_data), node_info, span )
@@ -86,7 +131,8 @@ case class HierarchyNode(
                     
         val node_info = asset_type match {
           case "SERVER_NODE" => { Some(getServerNodeInfo(asset)) }
-          case _ => { None }
+          case "SERVER_CHASSIS" => { Some(getServerChassisInfo(asset)) }
+          case _ => { Some(getGenericInfo(asset)) }
         }
 
         val row = HierarchyTableRow(-1, tag, Some(asset_data), node_info,  1 )
