@@ -2,6 +2,7 @@ package controllers
 
 import models.{Asset,HierarchyInfo}
 import util.config.Feature
+import util.ApiTattler
 
 import play.api.libs.json._
 import play.api.data._
@@ -18,14 +19,16 @@ trait HierarchyApi {
 
   case class HierarchyForm( child_tag: String,  start: Option[Int] = None, end: Option[Int] = None) {
     def merge(asset: Asset) =  {
+      val child = Asset.findByTag(child_tag).get
       HierarchyInfo.createOrUpdate(asset,child_tag, child_start=start, child_end = end)
+      ApiTattler.notice(child, None, "Moving %s to %s".format(child_tag, asset.tag))
     }
   }
   val HIERARCHY_FORM = Form(
     mapping(
       "child_tag" -> text,
       "start" -> optional(number),
-      "end" -> optional(number) 
+      "end" -> optional(number)
     )(HierarchyForm.apply)(HierarchyForm.unapply)
   )
 
@@ -61,6 +64,7 @@ trait HierarchyApi {
     val asset = Asset.findByTag(tag).get
     val child = Asset.findByTag(child_tag).get
     HierarchyInfo.deleteLink(asset.id, child.id)
+    ApiTattler.notice(child, None, "Removing %s from %s".format(child_tag, tag))
     val js = JsObject(Seq("SUCCESS" -> JsBoolean(true)))
     formatResponseData(ResponseData(Results.Ok, JsObject(Seq("SUCCESS" -> JsBoolean(true)))))
   }(Permissions.HierarchyApi.UpdateHierarchy)
@@ -78,7 +82,7 @@ trait HierarchyApi {
     val js = JsObject(Seq("values" -> (JsNumber(parent))))
     formatResponseData(ResponseData(Results.Ok, js ))
   }(Permissions.HierarchyApi.UpdateHierarchy)
-  
+
   def getAllNodes() = SecureAction { implicit req =>
     var nodes = HierarchyInfo.getAllNodes()
     val js = JsObject(Seq("values" -> JsArray(nodes.map(_.asJsonObj ))))
@@ -103,4 +107,4 @@ trait HierarchyApi {
 
 */
 
-  }
+}
