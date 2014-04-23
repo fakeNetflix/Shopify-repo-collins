@@ -207,14 +207,13 @@ object AssetLifecycle {
   }
 
   protected def updateIncompleteServer(asset: Asset, options: Map[String,String]): Status[Boolean] = {
-    val requiredKeys = Set("lshw", "lldp", "CHASSIS_TAG")
+    val requiredKeys = Set("lshw", "lldp")
     requiredKeys.find(key => !options.contains(key)).map { not_found =>
       return Left(new Exception(not_found + " parameter not specified"))
     }
 
     val lshw = options("lshw")
     val lldp = options("lldp")
-    val chassis_tag = options("CHASSIS_TAG")
 
     val filtered = options.filter(kv => !requiredKeys(kv._1))
     filtered.find(kv => AssetLifecycleConfig.isRestricted(kv._1)).map(kv =>
@@ -233,10 +232,33 @@ object AssetLifecycle {
         if (lldpParsingResults.isLeft) {
           throw lldpParsingResults.left.get
         }
-        MetaWrapper.createMeta(asset, filtered ++ Map(AssetMeta.Enum.ChassisTag.toString -> chassis_tag))
+        MetaWrapper.createMeta(asset, filtered)
         val newAsset = asset.copy(status = Status.New.map(_.id).getOrElse(0), updated = Some(new Date().asTimestamp))
         Asset.partialUpdate(newAsset, newAsset.updated, Some(newAsset.status), State.New)
-        InternalTattler.informational(newAsset, None, "Parsing and storing LSHW/LLDP data succeeded")
+        InternalTattler.informational(newAsset, None, "Parsing and storing LSHW data succeeded")
+        true
+      }
+    }.left.map(e => handleException(asset, "Exception updating asset", e))
+  }
+
+  protected def updateMaintenanceServer(asset: Asset, options: Map[String, String]): Status[Boolean] = {
+    //only lshw,lldp, and chasis tag can be updated in maintenance mode, at least one must be present
+    val allowedKeys = Set("lshw", "lldp", "CHASSIS_TAG")
+    if (allowedKeys.find{key => options.contains(key)} == None) {
+      return Left(new Exception("At least one of " + allowedKeys.mkString(",") + " required"))
+    }
+
+    allCatch[Boolean].either {
+      Asset.inTransaction {
+        options.get("lshw").foreach{lshw => 
+          parseLshw(asset, new LshwParser(lshw)).left.foreach{throw _}
+        }
+        options.get("lldp").foreach{lldp =>
+          parseLldp(asset, new LldpParser(lldp)).left.foreach{throw _}
+        }
+        options.get("CHASSIS_TAG").foreach{chassis_tag => 
+          MetaWrapper.createMeta(asset, Map(AssetMeta.Enum.ChassisTag.toString -> chassis_tag))
+        }
         true
       }
     }.left.map(e => handleException(asset, "Exception updating asset", e))
