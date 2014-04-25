@@ -167,27 +167,29 @@
 
       <div class="span6">
         @assetMeta.zipWithIndex.map { case(asset, idx) =>
+          @if( asset.name != "SERVICE_TAG" && asset.name !="CHASSIS_TAG" && asset.name != "RACK_POSITION" && asset.name != "BASE_PRODUCT" && asset.name != "BASE_VENDOR" && asset.name != "POWER_PORT"){
           @formField {
-      <!--            @formLabel(asset.name, asset.label)-->
-            @formInput {
-              @{
-  	       /*     asset.name match {
-                  case "DATACENTER_NAME" => optionDisplay(asset, 0, idx)
-                  case "DISK_TYPE" => optionDisplay(asset, 2, idx)
-                  case "DISK_STORAGE_TOTAL" => optionDisplay(asset, 1, idx)
-                  case "CPU_SPEED_GHZ" => optionDisplay(asset, 3, idx)
-                  case "MEMORY_SIZE_TOTAL" => optionDisplay(asset, 1, idx)
-                  case "NIC_SPEED" => optionDisplay(asset, 4, idx)
-  	              case "NODECLASS" => optionDisplay(asset, 0, idx)
-                  case "POOL" => optionDisplay(asset, 0, idx)
-                  case "PRIMARY_ROLE" => optionDisplay(asset, 0, idx)
-                  case "SECONDARY_ROLE" => optionDisplay(asset, 0, idx)
-                  case "BASE_VENDOR" => optionDisplay(asset, 0, idx)
-                  case _ => basicFormatter(asset, idx)
-                }*/
+            @formLabel(asset.name, asset.label)
+              @formInput {
+                @{
+                  asset.name match {
+                    case "DATACENTER_NAME" => optionDisplay(asset, 0, idx)
+                    case "DISK_TYPE" => optionDisplay(asset, 2, idx)
+                    case "DISK_STORAGE_TOTAL" => optionDisplay(asset, 1, idx)
+                    case "CPU_SPEED_GHZ" => optionDisplay(asset, 3, idx)
+                    case "MEMORY_SIZE_TOTAL" => optionDisplay(asset, 1, idx)
+                    case "NIC_SPEED" => optionDisplay(asset, 4, idx)
+                    case "NODECLASS" => optionDisplay(asset, 0, idx)
+                    case "POOL" => optionDisplay(asset, 0, idx)
+                    case "PRIMARY_ROLE" => optionDisplay(asset, 0, idx)
+                    case "SECONDARY_ROLE" => optionDisplay(asset, 0, idx)
+                    case "BASE_VENDOR" => optionDisplay(asset, 0, idx)
+                    case _ => basicFormatter(asset, idx)
+                  }
+                }
               }
-            }
           }
+         }
         }
       </div>
     </div>
