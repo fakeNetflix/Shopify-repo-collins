@@ -1,6 +1,6 @@
 package models.asset
 
-import models.{AssetType, State, Status}
+import models.{AssetType, State, Status, MetaWrapper}
 import play.api.libs.json.JsValue
 import java.sql.Timestamp
 
@@ -21,6 +21,7 @@ trait AssetView {
   def updated: Option[Timestamp]
   def deleted: Option[Timestamp]
 
+  def getMetaAttribute(name: String): Option[MetaWrapper] 
   def getHostnameMetaValue(): Option[String]
   def getPrimaryRoleMetaValue(): Option[String]
   def remoteHost: Option[String] //none if local

@@ -1,6 +1,6 @@
 package models.asset
 
-import models.{Asset, Status}
+import models.{Asset, Status, MetaWrapper}
 import conversions._
 import play.api.Logger
 import play.api.libs.json._
@@ -18,7 +18,13 @@ case class BasicRemoteAsset(hostTag: String, remoteUrl: String, json: JsObject)
     None
   }
 
+  private[this] def warnAboutMetaData(): Option[MetaWrapper] = {
+    logger.warn("Attempting to retrieve details data on basic remote asset")
+    None
+  }
+
   def getHostnameMetaValue() = warnAboutData()
   def getPrimaryRoleMetaValue() = warnAboutData()
+  def getMetaAttribute(name: String) = warnAboutMetaData()
 }
  

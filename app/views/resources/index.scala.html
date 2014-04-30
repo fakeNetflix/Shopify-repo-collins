@@ -47,6 +47,15 @@
         @formField {
           @formLabel("hostname", "Hostname")
           @formInput {
+            <input type="text" id="hostname" name="hostname" tabindex="2" >
+            <span class="help-inline"><i class="icon-question-sign" data-rel="tooltip" title="Hostname tag of asset"></i></span>
+          }
+        }
+
+
+        @formField {
+          @formLabel("hostname", "Hosts")
+          @formInput {
             @optionDisplay(AssetMeta.findOrCreateFromName("hostname"), 0, 0)
           }
         }
