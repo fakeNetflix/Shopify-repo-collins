@@ -43,7 +43,10 @@ case class HierarchyNode(
     }
 
     val ips = aa.addresses.map(_.dottedAddress).toList.mkString(" , ")
-    val ipmi = aa.ipmi.get.dottedAddress()
+    val ipmi = aa.ipmi match {
+      case None => "UNKNOWN" 
+      case x   => x.get.dottedAddress()
+    }
     RackUnitInfo(maint_tag, Some(hostname), Some(ips), Some(ipmi), None )
   }
 
