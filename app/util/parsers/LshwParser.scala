@@ -128,12 +128,14 @@ class LshwParser(txt: String) extends CommonParser[LshwRepresentation](txt) {
   private def getDefaultNicStorage(asset: LshwAsset): BitStorageUnit = {
     asset.product.toLowerCase.contains("10-gig") match {
       case true => BitStorageUnit(10000000000L)
-      case false => defaultNicCapacity
-        .map((s: String) => BitStorageUnit(s.toLong))
-        .getOrElse(
-          throw AttributeNotFoundException(
-            "Could not find capacity for network interface"
-        ))
+      case false => asset.product.toLowerCase.contains("gigabit") match {
+        case true => BitStorageUnit(1000000000L)
+        case false => defaultNicCapacity
+          .map((s: String) => BitStorageUnit(s.toLong))
+          .getOrElse(
+            BitStorageUnit(1000000000L)
+          )
+      }
     }
   }
 
