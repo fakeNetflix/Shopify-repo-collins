@@ -1,0 +1,10 @@
+#!/bin/bash
+
+AUTH=USER:PASS
+HOST="collins.host"
+
+PARENT=$1
+CHILD=$2
+
+
+curl --basic -u $AUTH -X POST "http://$HOST/api/hierarchy/$PARENT" -d child_tag=$CHILD -d start=$3 -d end=$4

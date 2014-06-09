@@ -1,0 +1,9 @@
+#!/bin/bash
+
+AUTH=USER:PASS
+HOST="collins.host"
+
+PARENT=$1
+CHILD=$2
+
+curl --basic -u $AUTH -X DELETE "http://$HOST/api/hierarchy/$PARENT/$CHILD"

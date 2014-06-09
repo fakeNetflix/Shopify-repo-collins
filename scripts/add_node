@@ -1,0 +1,8 @@
+#!/bin/bash
+
+AUTH=USER:PASS
+HOST="collins.host"
+
+NODE=$1
+
+curl --basic -u $AUTH -X PUT "http://$HOST/api/asset/$NODE" -d type=SERVER_NODE -d generate_ipmi=false

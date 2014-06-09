@@ -1,0 +1,15 @@
+#!/bin/bash
+
+AUTH=USER:PASS
+HOST="collins.host"
+
+NODE=$1
+ADDR=$2
+
+
+curl --basic -u $AUTH  "http://$HOST/api/asset/$NODE/ipmi" \
+-d address=$ADDR \
+-d gateway=172.17.0.1 \
+-d netmask=255.255.255.0 \
+-d username=root \
+-d password=fizzbuzz
