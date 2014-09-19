@@ -1,15 +1,9 @@
 # Collins
 
-# Shopify
-
-Checkout http://vault.shopify.com/collins
-
 ## Overview
 
-There is good documentation available at http://tumblr.github.com/collins. The
+There is good documentation available at http://shopify.github.io/collins. The
 documentation below is for developers or people setting up a new instance.
-
-The most recent production build of collins is available [here](http://tumblr.github.com/collins/downloads.html)
 
 ## Quickstart - Screencast
 
